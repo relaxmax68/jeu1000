@@ -1,0 +1,14 @@
+easy_admin:
+    entities:
+        # List the entity class name you want to manage
+        Level:
+          class: App\Entity\Level
+          form:
+            fields:
+              - {property: 'name'}
+              - {property: 'duration'}          
+        Question:
+          class: App\Entity\Question
+        Player:
+          class: App\Entity\Player
+
