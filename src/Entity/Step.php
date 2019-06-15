@@ -26,6 +26,18 @@ class Step
      */
     private $question;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Jeu", inversedBy="steps")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $jeu;
+
+    public function __construct($suite,$question)
+    {
+        $this->suite=$suite;
+        $this->question=$question;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -51,6 +63,18 @@ class Step
     public function setQuestion(?Question $question): self
     {
         $this->question = $question;
+
+        return $this;
+    }
+
+    public function getJeu(): ?Jeu
+    {
+        return $this->jeu;
+    }
+
+    public function setJeu(?Jeu $jeu): self
+    {
+        $this->jeu = $jeu;
 
         return $this;
     }
