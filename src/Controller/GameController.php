@@ -70,15 +70,14 @@ class GameController extends AbstractController
 
 		$this->session->set('jeu', $jeu);
 		
-		return $this->render('test.html.twig',[
-			'questions'=> $jeu->getSteps(),
-		]);
-/*
 		return $this->render('accueil.html.twig',[
-			'players'=>$players,
-			'question'=>$question
+//			'players'=>$players,
+			'status' => 'light',
+			'niveau' => 'PAUSE',
+			'score' => 0,
+			'question'=>['question'=>['question'=>"",'answer'=>""]]
 		]);
-		*/
+
 	}
 	/**
 	 * @Route("/question", name="question")

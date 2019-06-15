@@ -22,5 +22,19 @@ class HomeController extends AbstractController
 			'question'=>['question'=>['question'=>"",'answer'=>""]]
 		]);
 	}
+	/**
+	 * @Route("/scores", name="scores")
+	 * @return Response
+	 *
+	 */
+	public function scores(): Response
+	{
+		return $this->render('accueil.html.twig',[
+			'status' => 'light',
+			'niveau' => 'PAUSE',
+			'score' => 0,
+			'question'=>['question'=>['question'=>"",'answer'=>""]]
+		]);
+	}
 }
 ?>

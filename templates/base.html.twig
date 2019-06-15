@@ -19,28 +19,8 @@
               <li class="nav-item active">
                 <a class="nav-link" href="{{ path('new_game')}}">Jouer<span class="sr-only">(current)</span></a>
               </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Questions/Réponses 
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <a class="dropdown-item" href="#">Ajouter</a>
-                  <a class="dropdown-item" href="#">Modifier</a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="#">Supprimer</a>
-                </div>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Joueurs
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <a class="dropdown-item" href="#">Ajouter</a>
-                  <a class="dropdown-item" href="#">Modifier</a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="#">Afficher les scores</a>
-                  <a class="dropdown-item" href="#">Réinitialiser les scores</a>
-                </div>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ path('scores')}}">Scores</a>
               </li>
             </ul>
           </div>
