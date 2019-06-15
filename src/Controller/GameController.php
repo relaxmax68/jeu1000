@@ -10,9 +10,21 @@ use App\Entity\Jeu;
 use App\Entity\Step;
 
 use App\Repository\QuestionRepository;
+use App\Repository\LevelRepository;
+
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+
 
 class GameController extends AbstractController
 {
+	private $session;
+
+	public function __construct(SessionInterface $session)
+	{
+		$this->session = $session;
+	}
+
+
 	/**
 	 * @Route("/new", name="new_game")
 	 * @return Response
@@ -21,6 +33,9 @@ class GameController extends AbstractController
 	public function new(QuestionRepository $q): Response
 	{
 		$jeu = new Jeu();
+
+		//représente le niveau de question atteint par les joueurs
+		$this->session->set('niveau',0);
 
 		$nb_bleues = $q->findAllByLevel(1);
 		$nb_blanches = $q->findAllByLevel(2);
@@ -67,12 +82,18 @@ class GameController extends AbstractController
 	 * @return Response
 	 *
 	 */
-	public function question(): Response
+	public function question(LevelRepository $level): Response
 	{
+		$niveau = $this->session->get('niveau');
+		$niveau++;
+		$this->session->set('niveau',$niveau);
+
 		return $this->render('accueil.html.twig',[
+			'bouton' => 'primary',
+			'niveau' => $level->find($niveau)
 		]);
 	}
-		/**
+	/**
 	 * @Route("/response", name="response")
 	 * @return Response
 	 *

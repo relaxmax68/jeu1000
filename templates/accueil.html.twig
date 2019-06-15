@@ -3,17 +3,17 @@
 {% block title %}Jeu des 1000€{% endblock %}
 
 {% block body %}
-	<div class="container mt-5">
+	<div class="container mt-3">
 		<div class="jumbotron text-center">
 			<h1>"Jeu des 1000€"</h1>
 			<hr>
 			<h3 class="text-capitalize" style="font-size: 4rem;">Nom des joueurs</h3>
 			<div>score :</div>
 		</div>
-		<div class="btn-block btn-primary btn-lg text-center">
-			Niveau
+		<div class="btn-block btn-{{ bouton }} btn-lg text-center">
+			{{ niveau }}
 		</div>
-		<div class="btn-block btn-blanck btn-lg"></div>
+		<div class="btn-block btn-lg"></div>
 		<div class="row">
 		  <div class="col-lg-6">
 		  	<div class="jumbotron">
@@ -25,7 +25,7 @@
 			  		<div class="card-body ml-1">Question</div>
 		  		</div>
 		  	</div>
-		    <div class="btn-block btn-blanck btn-lg"></div>
+		    <div class="btn-block btn-md"></div>
 		    <button class="btn-block btn-success btn-lg text-center">Bonne réponse</button>
 		  </div>
 		  <div class="col-lg-6">
@@ -38,7 +38,7 @@
 			  		<div class="card-body ml-1">Réponse</div>
 		  		</div>
 		  	</div>
-		  	<div class="btn-block btn-blanck btn-lg"></div>
+		  	<div class="btn-block btn-md"></div>
 		    <button class="btn-block btn-danger btn-lg text-center">Mauvaise réponse</button>
 		  </div>
 		</div>

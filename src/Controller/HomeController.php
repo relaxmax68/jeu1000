@@ -16,26 +16,8 @@ class HomeController extends AbstractController
 	public function index(): Response
 	{
 		return $this->render('accueil.html.twig',[
-		]);
-	}
-	/**
-	 * @Route("/question", name="question")
-	 * @return Response
-	 *
-	 */
-	public function question(): Response
-	{
-		return $this->render('accueil.html.twig',[
-		]);
-	}
-		/**
-	 * @Route("/response", name="response")
-	 * @return Response
-	 *
-	 */
-	public function response(): Response
-	{
-		return $this->render('accueil.html.twig',[
+			'bouton' => 'primary',
+			'niveau' => 'Question bleue'
 		]);
 	}
 }
