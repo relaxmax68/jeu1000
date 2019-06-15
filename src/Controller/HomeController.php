@@ -16,8 +16,9 @@ class HomeController extends AbstractController
 	public function index(): Response
 	{
 		return $this->render('accueil.html.twig',[
-			'bouton' => 'primary',
-			'niveau' => 'Question bleue'
+			'status' => 'light',
+			'niveau' => 'PAUSE',
+			'score' => 0
 		]);
 	}
 }

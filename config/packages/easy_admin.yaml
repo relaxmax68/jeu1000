@@ -6,7 +6,8 @@ easy_admin:
           form:
             fields:
               - {property: 'name'}
-              - {property: 'duration'}          
+              - {property: 'duration'}        
+              - {property: 'status'}        
         Question:
           class: App\Entity\Question
         Player:

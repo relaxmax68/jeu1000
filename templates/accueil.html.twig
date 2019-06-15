@@ -8,9 +8,9 @@
 			<h1>"Jeu des 1000€"</h1>
 			<hr>
 			<h3 class="text-capitalize" style="font-size: 4rem;">Nom des joueurs</h3>
-			<div>score :</div>
+			<div>score :{{ score }}</div>
 		</div>
-		<div class="btn-block btn-{{ bouton }} btn-lg text-center">
+		<div class="btn-block btn-{{ status }} btn-lg text-center">
 			{{ niveau }}
 		</div>
 		<div class="btn-block btn-lg"></div>
@@ -18,10 +18,12 @@
 		  <div class="col-lg-6">
 		  	<div class="jumbotron">
 		  		<div class="row">
-			  		<div class="btn btn-outline-primary">
-				  		<div><i class="fas fa-question-circle" style="font-size: 3rem;"></i></div>
-				  		<div><a href="{{ path('question')}} ">Nouvelle Question</a></div>
-			  		</div>
+		  			<a href="{{ path('question')}} ">
+				  		<div class="btn btn-outline-primary">
+					  		<div><i class="fas fa-question-circle" style="font-size: 3rem;"></i></div>
+					  		<div>Nouvelle Question</div>
+				  		</div>
+			 	 	</a>
 			  		<div class="card-body ml-1">Question</div>
 		  		</div>
 		  	</div>
@@ -31,10 +33,12 @@
 		  <div class="col-lg-6">
 		  	<div class="jumbotron">
 		  		<div class="row">
-		  			<div class="btn btn-outline-info">
-				  		<div><i class="fas fa-comment-dots" style="font-size: 3rem;"></i></div>
-			  			<div><a href="{{ path('response')}} ">Obtenir la réponse</a></div>
-			  		</div>
+		  			<a href="{{ path('response')}} ">
+			  			<div class="btn btn-outline-info">
+					  		<div><i class="fas fa-comment-dots" style="font-size: 3rem;"></i></div>
+				  			<div>Obtenir la réponse</div>
+				  		</div>
+				  	</a>
 			  		<div class="card-body ml-1">Réponse</div>
 		  		</div>
 		  	</div>

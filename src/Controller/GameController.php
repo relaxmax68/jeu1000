@@ -36,6 +36,7 @@ class GameController extends AbstractController
 
 		//représente le niveau de question atteint par les joueurs
 		$this->session->set('niveau',0);
+		$this->session->set('score',0);
 
 		$nb_bleues = $q->findAllByLevel(1);
 		$nb_blanches = $q->findAllByLevel(2);
@@ -87,10 +88,13 @@ class GameController extends AbstractController
 		$niveau = $this->session->get('niveau');
 		$niveau++;
 		$this->session->set('niveau',$niveau);
+dump($niveau);
+		dump($level->find($niveau));
 
 		return $this->render('accueil.html.twig',[
-			'bouton' => 'primary',
-			'niveau' => $level->find($niveau)
+			'niveau' => $level->find($niveau),
+			'status' => $level->find($niveau)->getStatus(),
+			'score' => $this->session->get('score')
 		]);
 	}
 	/**

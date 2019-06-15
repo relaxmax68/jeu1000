@@ -33,6 +33,11 @@ class Level
      */
     private $questions;
 
+    /**
+     * @ORM\Column(type="string", length=20)
+     */
+    private $status;
+
     public function __toString()
     {
         return $this->name;
@@ -99,6 +104,18 @@ class Level
                 $question->setLevel(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): self
+    {
+        $this->status = $status;
 
         return $this;
     }
