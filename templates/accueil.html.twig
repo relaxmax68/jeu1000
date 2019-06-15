@@ -11,20 +11,20 @@
 			<div>score :{{ score }}</div>
 		</div>
 		<div class="btn-block btn-{{ status }} btn-lg text-center">
-			{{ niveau }}
+			<a href="{{ path('question')}}">{{ niveau }}</a>
 		</div>
 		<div class="btn-block btn-lg"></div>
 		<div class="row">
 		  <div class="col-lg-6">
 		  	<div class="jumbotron">
 		  		<div class="row">
-		  			<a href="{{ path('question')}} ">
-				  		<div class="btn btn-outline-primary">
+		  			<div onclick="javascript:visibilite('question'); return false;">
+				  		<div class="btn btn-outline-primary" onclick="javascript:decompte(); return false;">
 					  		<div><i class="fas fa-question-circle" style="font-size: 3rem;"></i></div>
 					  		<div>Nouvelle Question</div>
 				  		</div>
-			 	 	</a>
-			  		<div class="card-body ml-1">{{ question.question.question }}</div>
+			 	 	</div>
+			  		<div class="card-body ml-1" style="display:none" id="question">{{ question.question.question }}</div>
 		  		</div>
 		  	</div>
 		    <div class="btn-block btn-md"></div>
@@ -34,10 +34,10 @@
 		  	<div class="jumbotron">
 		  		<div class="row">
 		  			<div onclick="javascript:visibilite('reponse'); return false;">
-			  			<div class="btn btn-outline-info">
+			  			<button class="btn btn-outline-info" onclick="javascript:stop(); return false;">
 					  		<div><i class="fas fa-comment-dots" style="font-size: 3rem;"></i></div>
 				  			<div>Obtenir la réponse</div>
-				  		</div>
+				  		</button>
 				  	</div>
 			  		<div class="card-body ml-1" style="display:none" id="reponse">{{ question.question.answer }}</div>
 		  		</div>
@@ -47,13 +47,56 @@
 		  </div>
 		</div>
 		<hr>
-		<div class="progress">
-			<div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+		<div class="progress" style="height: 3em">
+			<div class="progress-bar" role="progressbar" valuenow="0" aria-valuemin="0" aria-valuemax="30"></div>
 		</div>
 	</div>
 {% endblock %}
 {% block javascripts %}
 <script>
-	function visibilite(thingId) { var targetElement; targetElement = document.getElementById(thingId) ; if (targetElement.style.display == "none") { targetElement.style.display = "" ; } else { targetElement.style.display = "none" ; } } 
+
+ 	var i = 0
+ 	var ting = new Audio('snd/1111.wav');
+ 	var fin = new Audio('snd/1112.wav');
+ 	var p = document.querySelector(".progress-bar")
+ 	var timer
+
+	function visibilite(thingId) {
+		var targetElement;
+		targetElement = document.getElementById(thingId)
+		if (targetElement.style.display == "none") {
+			targetElement.style.display = ""
+		} else {
+			targetElement.style.display = "none"}
+	}
+
+	function decompte() {
+
+		if(timer){
+		clearTimeout(timer)
+		}else{
+		var timer = setInterval(function () {
+	    	
+	     	if (i<30){
+		    	i++
+				ting.play()
+				p.innerHTML = 30-i+1
+				p.style = "width: "+Math.round(i*3.3)+"%"
+	     	} else {
+				fin.play()
+				clearTimeout(timer)
+				p.innerHTML = 0
+				p.style = "width: 100%"
+				p.className += " progress-bar-striped";
+	     	}
+		}, 1000)
+	}
+	}
+
+	function stop(){
+		fin.play()
+		i = 30
+	}
+
 </script>
 {% endblock %}
