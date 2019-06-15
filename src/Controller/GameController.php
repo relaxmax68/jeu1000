@@ -35,7 +35,7 @@ class GameController extends AbstractController
 		$jeu = new Jeu();
 
 		//représente le niveau de question atteint par les joueurs
-		$this->session->set('niveau',0);
+		$this->session->set('step',-1);
 		$this->session->set('score',0);
 
 		$nb_bleues = $q->findAllByLevel(1);
@@ -67,6 +67,8 @@ class GameController extends AbstractController
 		//sélection de la question super banco
 
 		$jeu->addStep(new Step(11,$nb_supers[random_int(0, count($nb_supers)-1)]));
+
+		$this->session->set('jeu', $jeu);
 		
 		return $this->render('test.html.twig',[
 			'questions'=> $jeu->getSteps(),
@@ -85,16 +87,17 @@ class GameController extends AbstractController
 	 */
 	public function question(LevelRepository $level): Response
 	{
-		$niveau = $this->session->get('niveau');
-		$niveau++;
-		$this->session->set('niveau',$niveau);
-dump($niveau);
-		dump($level->find($niveau));
+		$step = $this->session->get('step');
+		$step++;
+		$this->session->set('step',$step);
+
+		$niveau = $this->session->get('jeu')->getSteps()[$step]->getQuestion()->getLevel()->getId();
 
 		return $this->render('accueil.html.twig',[
-			'niveau' => $level->find($niveau),
-			'status' => $level->find($niveau)->getStatus(),
-			'score' => $this->session->get('score')
+			'niveau'  => $level->find($niveau),
+			'status'  => $level->find($niveau)->getStatus(),
+			'score'   => $this->session->get('score'),
+			'question'=> $this->session->get('jeu')->getSteps()[$step]
 		]);
 	}
 	/**

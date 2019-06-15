@@ -18,7 +18,8 @@ class HomeController extends AbstractController
 		return $this->render('accueil.html.twig',[
 			'status' => 'light',
 			'niveau' => 'PAUSE',
-			'score' => 0
+			'score' => 0,
+			'question'=>['question'=>['question'=>"",'answer'=>""]]
 		]);
 	}
 }
