@@ -83,7 +83,7 @@ class GameController extends AbstractController
 			'status' => 'light',
 			'niveau' => 'PAUSE',
 			'score' => 0,
-			'question'=>['question'=>['question'=>"",'answer'=>""]]
+			'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
 		]);
 
 	}

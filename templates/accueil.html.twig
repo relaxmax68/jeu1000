@@ -2,29 +2,36 @@
 
 {% block title %}Jeu des 1000€{% endblock %}
 
+{% block stylesheets %}
+	<style>
+		a:visited{color: white;text-decoration: none;}
+		a:hover{color: white;text-decoration: none;}
+	</style>
+{% endblock %}
+
 {% block body %}
-	<div class="container mt-3">
+	<div class="container mt-1">
 		<div class="jumbotron text-center">
 			<h1>"Jeu des 1000€"</h1>
 			<hr>
 			<h3 class="text-capitalize" style="font-size: 4rem;">Nom des joueurs</h3>
 			<div>score :{{ score }}</div>
 		</div>
-		<div class="btn-block btn-{{ status }} btn-lg text-center">
-			<a href="{{ path('question')}}">{{ niveau }}</a>
-		</div>
+		<a href="{{ path('question')}}" hover:"color:white" visited:"color: white;">
+			<div class="btn-block btn-{{ status }} btn-lg text-center">{{ niveau }}</div>
+		</a>
 		<div class="btn-block btn-lg"></div>
 		<div class="row">
 		  <div class="col-lg-6">
 		  	<div class="jumbotron">
 		  		<div class="row">
-		  			<div onclick="javascript:visibilite('question'); return false;">
+		  			<div class="col-lg-3" onclick="javascript:visibilite('question'); return false;">
 				  		<div class="btn btn-outline-primary" onclick="javascript:decompte(); return false;">
 					  		<div><i class="fas fa-question-circle" style="font-size: 3rem;"></i></div>
 					  		<div>Nouvelle Question</div>
 				  		</div>
 			 	 	</div>
-			  		<div class="card-body ml-1" style="display:none" id="question">{{ question.question.question }}</div>
+			  		<div class="col-lg-8 ml-1" style="display:none" id="question">{{ question.question.question }}</div>
 		  		</div>
 		  	</div>
 		    <div class="btn-block btn-md"></div>
@@ -33,13 +40,13 @@
 		  <div class="col-lg-6">
 		  	<div class="jumbotron">
 		  		<div class="row">
-		  			<div onclick="javascript:visibilite('reponse'); return false;">
+		  			<div class="col-lg-3" onclick="javascript:visibilite('reponse'); return false;">
 			  			<button class="btn btn-outline-info" onclick="javascript:stop(); return false;">
 					  		<div><i class="fas fa-comment-dots" style="font-size: 3rem;"></i></div>
 				  			<div>Obtenir la réponse</div>
 				  		</button>
 				  	</div>
-			  		<div class="card-body ml-1" style="display:none" id="reponse">{{ question.question.answer }}</div>
+			  		<div class="col-lg-8 ml-1" style="display:none" id="reponse">{{ question.question.answer }}</div>
 		  		</div>
 		  	</div>
 		  	<div class="btn-block btn-md"></div>

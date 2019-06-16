@@ -19,7 +19,7 @@ class HomeController extends AbstractController
 			'status' => 'light',
 			'niveau' => 'PAUSE',
 			'score' => 0,
-			'question'=>['question'=>['question'=>"",'answer'=>""]]
+			'question'=>['question'=>['question'=>"Voilà la question ?",'answer'=>"Voici la réponse !"]]
 		]);
 	}
 	/**
