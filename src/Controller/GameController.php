@@ -45,7 +45,7 @@ class GameController extends AbstractController
 		$nb_supers = $q->findAllByLevel(5);
 
 		//sélection des questions bleues
-		if($nb_bleues>0){
+		if(!empty($nb_bleues)){
 			for ($i = 1; $i < 4 ; $i++) {
 				$step = new Step($i,$nb_bleues[random_int(0, count($nb_bleues)-1)]);
 				while ($jeu->getSteps()->contains($step)) {
@@ -55,7 +55,7 @@ class GameController extends AbstractController
 			}
 		}
 		//sélection des questions blanches
-		if($nb_blanches>0){		
+		if(!empty($nb_blanches)){		
 			for ($i = 4; $i < 6 ; $i++) {
 				$step = new Step($i,$nb_blanches[random_int(0, count($nb_blanches)-1)]);
 				while ($jeu->getSteps()->contains($step)) {
@@ -65,15 +65,15 @@ class GameController extends AbstractController
 			}
 		}
 		//sélection de la question rouge
-		if($nb_rouges>0){
+		if(!empty($nb_rouges)){
 			$jeu->addStep(new Step(6,$nb_rouges[random_int(0, count($nb_rouges)-1)]));
 		}
 		//sélection de la question banco
-		if($nb_bancos>0){
+		if(!empty($nb_bancos)){
 			$jeu->addStep(new Step(10,$nb_bancos[random_int(0, count($nb_bancos)-1)]));
 		}
 		//sélection de la question super banco
-		if($nb_supers>0){
+		if(!empty($nb_supers)){
 			$jeu->addStep(new Step(11,$nb_supers[random_int(0, count($nb_supers)-1)]));
 		}
 		$this->session->set('jeu', $jeu);
