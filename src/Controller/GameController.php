@@ -98,18 +98,18 @@ class GameController extends AbstractController
 		$step++;
 		$this->session->set('step',$step);
 
-		if($step < count($this->session->get('jeu')->getSteps())){
-			$niveau = $this->session->get('jeu')->getSteps()[$step]->getQuestion()->getLevel()->getId();
-
-			return $this->render('accueil.html.twig',[
-				'niveau'  => $level->find($niveau),
-				'status'  => $level->find($niveau)->getStatus(),
-				'score'   => $this->session->get('score'),
-				'question'=> $this->session->get('jeu')->getSteps()[$step]
-			]);
-		}else{
+		if( is_null($this->session->get('jeu')) || $step >= count($this->session->get('jeu')->getSteps())){
 			return $this->redirectToRoute('new_game',[],301);
 		}
+
+		$niveau = $this->session->get('jeu')->getSteps()[$step]->getQuestion()->getLevel()->getId();
+
+		return $this->render('accueil.html.twig',[
+			'niveau'  => $level->find($niveau),
+			'status'  => $level->find($niveau)->getStatus(),
+			'score'   => $this->session->get('score'),
+			'question'=> $this->session->get('jeu')->getSteps()[$step]
+		]);
 	}
 	/**
 	 * @Route("/response", name="response")
