@@ -8,6 +8,7 @@ easy_admin:
               - {property: 'name'}
               - {property: 'duration'}        
               - {property: 'status'}        
+              - {property: 'score'}        
         Question:
           class: App\Entity\Question
         Player:

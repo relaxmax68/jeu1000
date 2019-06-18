@@ -16,11 +16,15 @@
 
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
-              <li class="nav-item active">
-                <a class="nav-link" href="{{ path('new_game')}}">Jouer<span class="sr-only">(current)</span></a>
+              <li class="nav-item dropdown">
+                  <div class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Scores</div>
+                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="{{ path('scores')}}">Score des joueurs</a>
+                    <a class="dropdown-item" href="{{ path('init')}}">Réinitialiser</a>
+                  </div>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{{ path('scores')}}">Scores</a>
+                <a class="nav-link" href="#"><b>Banque : {{ banque }} €</b></a>
               </li>
             </ul>
           </div>

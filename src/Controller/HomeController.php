@@ -10,11 +10,11 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 class HomeController extends AbstractController
 {
 	/**
-	 * @Route("/", name="home")
+	 * @Route("/init", name="init")
 	 * @return Response
 	 *
 	 */
-	public function index(): Response
+	public function init(): Response
 	{
 		session_unset();
 
@@ -22,22 +22,9 @@ class HomeController extends AbstractController
 			'status' => 'light',
 			'niveau' => 'Cliquez ici pour commencer un nouveau jeu',
 			'score' => 0,
+			'banque' => 0,	
+			'reponse' =>['Bonne réponse', 'Mauvaise réponse'],					
 			'question'=>['question'=>['question'=>"Voilà la question ?",'answer'=>"Voici la réponse !"]],
-			'players'=>["Joueur 1", "Joueur 2"]
-		]);
-	}
-	/**
-	 * @Route("/scores", name="scores")
-	 * @return Response
-	 *
-	 */
-	public function scores(): Response
-	{
-		return $this->render('accueil.html.twig',[
-			'status' => 'light',
-			'niveau' => 'PAUSE',
-			'score' => 0,
-			'question'=>['question'=>['question'=>"",'answer'=>""]],
 			'players'=>["Joueur 1", "Joueur 2"]
 		]);
 	}

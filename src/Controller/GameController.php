@@ -20,6 +20,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 class GameController extends AbstractController
 {
 	private $session;
+	private $question;
 
 	public function __construct(SessionInterface $session)
 	{
@@ -68,17 +69,6 @@ class GameController extends AbstractController
 				$jeu->addStep($step);
 			}
 		}
-
-		//sélection des questions bleues
-		if(!empty($nb_bleues)){
-			for ($i = 1; $i < 4 ; $i++) {
-				$step = new Step($i,$nb_bleues[random_int(0, count($nb_bleues)-1)]);
-				while ($jeu->getSteps()->contains($step)) {
-					$step = new Step($i,$nb_bleues[random_int(0, count($nb_bleues)-1)]);
-				}
-				$jeu->addStep($step);
-			}
-		}
 		//sélection des questions blanches
 		if(!empty($nb_blanches)){		
 			for ($i = 4; $i < 6 ; $i++) {
@@ -107,23 +97,137 @@ class GameController extends AbstractController
 			'players'=> $this->session->get('jeu')->getPlayers(),
 			'status' => 'light',
 			'niveau' => 'Le jeu est prêt ! Cliquez ici pour passer aux étapes suivantes',
-			'score' => 0,
+			'score'  => 0,
+			'banque' => $this->session->get('bank'),
+			'reponse' =>['Bonne réponse', 'Mauvaise réponse'],			
 			'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
 		]);
 
 	}
 	/**
-	 * @Route("/question", name="question")
+	 * @Route("/question/{score}", name="question")
 	 * @return Response
 	 *
 	 */
-	public function question(LevelRepository $level): Response
+	public function question(LevelRepository $level, $score): Response
 	{
 		$step = $this->session->get('step');
+		$points = $this->session->get('points');
+		$question = $this->session->get('question');
+		$contexte = $this->session->get('contexte');
 
 		//on enregistre les résultats
-		
-		
+		if ($score == "good") {
+
+			if( $contexte == "jeu") {
+
+				$this->session->get('jeu')->addScore($points);
+
+				$this->session->set('question',$question+1);
+				// banco ?
+				if ($this->session->get('jeu')->getSteps()[$step]->getQuestion()->getLevel()->getId() == 3 ) {
+
+					$this->session->set('contexte',"choix");
+
+					return $this->render('accueil.html.twig',[
+						'players'=> $this->session->get('jeu')->getPlayers(),
+						'status' => 'warning',
+						'niveau' => "Vous avez gagné ! ".$this->session->get('jeu')->getScore()." € ! Banco ?",
+						'score' => $this->session->get('jeu')->getScore(),
+						'banque' => $this->session->get('bank'),
+						'reponse' =>['Oui', 'Non'],					
+						'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
+					]);
+				}
+				// super ?
+				if ($this->session->get('jeu')->getSteps()[$step]->getQuestion()->getLevel()->getId() == 4 ) {
+
+					$this->session->set('contexte',"choix");
+
+					return $this->render('accueil.html.twig',[
+						'players'=> $this->session->get('jeu')->getPlayers(),
+						'status' => 'warning',
+						'niveau' => "Bravo ! Vous avez gagné 500 € Super Banco ?",
+						'score' => 500,
+						'banque' => $this->session->get('bank'),
+						'reponse' =>['Oui', 'Non'],
+						'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
+					]);
+				}
+				if ($this->session->get('jeu')->getSteps()[$step]->getQuestion()->getLevel()->getId() == 5 ) {
+
+					$this->session->set('bank',$this->session->get('bank')-1000);
+					$this->session->get('jeu')->addAllScores();
+					$this->session->set('contexte',"fin");					
+
+					return $this->render('accueil.html.twig',[
+						'players'=> $this->session->get('jeu')->getPlayers(),
+						'status' => 'warning',
+						'niveau' => '*** Vous avez gagné 1000 € ! ***',
+						'score'  => 0,
+						'banque'  => $this->session->get('bank'),
+						'reponse' =>['Nouveau Jeu', 'Arrêter'],				
+						'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
+					]);
+				}
+			}
+			
+			if( $contexte == "choix" ){
+dump($contexte);
+			}
+
+			if( $contexte == "fin" ){
+dump($contexte);
+			}
+		}
+
+		if ($score == "bad") {
+
+			if( $contexte == "jeu") {
+
+				$this->session->get('jeu')->addScore(-$points);
+				//on réintroduit la question
+				$this->session->get('jeu')->addStep(new Step($step+7,$this->session->get('jeu')->getSteps()[$step]->getQuestion()));
+				// banco ?
+				if ($this->session->get('jeu')->getSteps()[$step]->getQuestion()->getLevel()->getId() == 3 ) {
+					if ($this->session->get('question') < 5){
+
+						$perte = $this->session->get('jeu')->getScore();
+
+						$players = $this->session->get('jeu')->getPlayers();
+
+						$this->session->set('bank',$this->session->get('bank')-$perte);
+						$this->session->set('jeu',new Jeu());
+
+						$this->session->get('jeu')->addPlayer($players[0]);
+						$this->session->get('jeu')->addPlayer($players[1]);
+
+						$this->session->set('contexte',"fin");
+
+						return $this->render('accueil.html.twig',[
+							'players'=> $this->session->get('jeu')->getPlayers(),
+							'status' => 'info',
+							'niveau' => "* Vous n'avez pas suffisemment de bonnes réponses. Vous avez perdu ! ".-$perte." € *",
+							'score' => 0,
+							'banque' => $this->session->get('bank'),
+							'reponse' =>['Nouveau Jeu', 'Arrêter'],				
+							'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
+						]);
+					}
+				}
+			}
+			if( $contexte == "choix" ){//non
+				dump($contexte);
+				$this->session->set('bank',$this->session->get('bank')+$this->session->get('jeu')->getScore());
+				$this->session->get('jeu')->addAllScores();
+				return $this->redirectToRoute('new_game',[],301);
+			}
+
+			if( $contexte == "fin" ){//arrêter
+dump($contexte);
+				return $this->redirectToRoute('scores',[],301);
+			}
+		}
 
 		// on prépare la prochaine question
 		$step++;
@@ -135,12 +239,48 @@ class GameController extends AbstractController
 
 		$niveau = $this->session->get('jeu')->getSteps()[$step]->getQuestion()->getLevel()->getId();
 
+		$this->session->set('points',$level->find($niveau)->getScore());
+		$this->session->set('contexte',"jeu");
+
 		return $this->render('accueil.html.twig',[
 			'players' => $this->session->get('jeu')->getPlayers(),
 			'niveau'  => $level->find($niveau),
 			'status'  => $level->find($niveau)->getStatus(),
-			'score'   => $this->session->get('score'),
+			'score'   => $this->session->get('jeu')->getScore(),
+			'banque' => $this->session->get('bank'),
+			'reponse' =>['Bonne réponse', 'Mauvaise réponse'],
 			'question'=> $this->session->get('jeu')->getSteps()[$step]
+		]);
+	}
+	/**
+	 * @Route("/scores", name="scores")
+	 * @return Response
+	 *
+	 */
+	public function scores(PlayerRepository $p): Response
+	{
+		$players = $p->findSorted();
+
+		return $this->render('scores.html.twig',[
+			'banque' => $this->session->get('bank'),			
+			'players'=> $players
+		]);
+	}
+	/**
+	 * @Route("/", name="home")
+	 * @return Response
+	 *
+	 */
+	public function index(): Response
+	{
+		return $this->render('accueil.html.twig',[
+			'status' => 'light',
+			'niveau' => 'Cliquez ici pour commencer un nouveau jeu',
+			'score' => 0,
+			'banque' => $this->session->get('bank'),
+			'reponse' =>['Bonne réponse', 'Mauvaise réponse'],					
+			'question'=>['question'=>['question'=>"Voilà la question ?",'answer'=>"Voici la réponse !"]],
+			'players'=>["Joueur 1", "Joueur 2"]
 		]);
 	}
 }

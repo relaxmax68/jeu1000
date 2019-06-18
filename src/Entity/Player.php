@@ -74,6 +74,13 @@ class Player
         return $this;
     }
 
+    public function addScore(int $score): self
+    {
+        $this->score = $this->score+$score;
+
+        return $this;
+    }
+
     /**
      * @return Collection|Jeu[]
      */
