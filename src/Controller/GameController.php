@@ -8,9 +8,11 @@ use Twig\Environment;
 
 use App\Entity\Jeu;
 use App\Entity\Step;
+use App\Entity\Player;
 
 use App\Repository\QuestionRepository;
 use App\Repository\LevelRepository;
+use App\Repository\PlayerRepository;
 
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
@@ -30,7 +32,7 @@ class GameController extends AbstractController
 	 * @return Response
 	 *
 	 */
-	public function new(QuestionRepository $q): Response
+	public function new(PlayerRepository $p, QuestionRepository $q): Response
 	{
 		$jeu = new Jeu();
 
@@ -43,6 +45,29 @@ class GameController extends AbstractController
 		$nb_rouges = $q->findAllByLevel(3);
 		$nb_bancos = $q->findAllByLevel(4);
 		$nb_supers = $q->findAllByLevel(5);
+		$nb_players = $p->findAll();
+		shuffle($nb_players);
+
+		// sélection des joueurs
+		for ($i = 0; $i <2 ; $i++) {
+			if(empty($nb_players)){
+				$jeu->addPlayer(new Player());
+			} else {
+				$jeu->addPlayer($nb_players[0]);
+				array_shift($nb_players);
+			}
+		}
+
+		//sélection des questions bleues
+		if(!empty($nb_bleues)){
+			for ($i = 1; $i < 4 ; $i++) {
+				$step = new Step($i,$nb_bleues[random_int(0, count($nb_bleues)-1)]);
+				while ($jeu->getSteps()->contains($step)) {
+					$step = new Step($i,$nb_bleues[random_int(0, count($nb_bleues)-1)]);
+				}
+				$jeu->addStep($step);
+			}
+		}
 
 		//sélection des questions bleues
 		if(!empty($nb_bleues)){
@@ -79,7 +104,7 @@ class GameController extends AbstractController
 		$this->session->set('jeu', $jeu);
 		
 		return $this->render('accueil.html.twig',[
-//			'players'=>$players,
+			'players'=> $this->session->get('jeu')->getPlayers(),
 			'status' => 'light',
 			'niveau' => 'Le jeu est prêt ! Cliquez ici pour passer aux étapes suivantes',
 			'score' => 0,
@@ -105,6 +130,7 @@ class GameController extends AbstractController
 		$niveau = $this->session->get('jeu')->getSteps()[$step]->getQuestion()->getLevel()->getId();
 
 		return $this->render('accueil.html.twig',[
+			'players' => $this->session->get('jeu')->getPlayers(),
 			'niveau'  => $level->find($niveau),
 			'status'  => $level->find($niveau)->getStatus(),
 			'score'   => $this->session->get('score'),

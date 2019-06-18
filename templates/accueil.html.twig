@@ -14,7 +14,9 @@
 		<div class="jumbotron text-center">
 			<h1>"Jeu des 1000€"</h1>
 			<hr>
-			<h3 class="text-capitalize" style="font-size: 4rem;">Nom des joueurs</h3>
+			<h3 class="text-capitalize" style="font-size: 4rem;">
+			    {{ players|first}} & {{ players|last}}
+			</h3>
 			<div>score :{{ score }}</div>
 		</div>
 		<a href="{{ path('question')}}" hover:"color:white" visited:"color: white;">

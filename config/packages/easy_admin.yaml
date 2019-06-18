@@ -12,4 +12,8 @@ easy_admin:
           class: App\Entity\Question
         Player:
           class: App\Entity\Player
+          form:
+            fields:
+              - {property: 'name'}
+              - {property: 'score'} 
 

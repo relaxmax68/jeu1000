@@ -35,8 +35,14 @@ class Player
 
     public function __construct()
     {
+        $this->name = "test";
         $this->score = 0;
-        $this->jeux = new ArrayCollection();   
+        $this->jeux = new ArrayCollection();
+    }
+
+    public function __toString()
+    {
+        return $this->name;
     }
 
     public function getId(): ?int

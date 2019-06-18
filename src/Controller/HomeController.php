@@ -22,7 +22,8 @@ class HomeController extends AbstractController
 			'status' => 'light',
 			'niveau' => 'Cliquez ici pour commencer un nouveau jeu',
 			'score' => 0,
-			'question'=>['question'=>['question'=>"Voilà la question ?",'answer'=>"Voici la réponse !"]]
+			'question'=>['question'=>['question'=>"Voilà la question ?",'answer'=>"Voici la réponse !"]],
+			'players'=>["Joueur 1", "Joueur 2"]
 		]);
 	}
 	/**
@@ -36,7 +37,8 @@ class HomeController extends AbstractController
 			'status' => 'light',
 			'niveau' => 'PAUSE',
 			'score' => 0,
-			'question'=>['question'=>['question'=>"",'answer'=>""]]
+			'question'=>['question'=>['question'=>"",'answer'=>""]],
+			'players'=>["Joueur 1", "Joueur 2"]
 		]);
 	}
 }
