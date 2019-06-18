@@ -77,10 +77,14 @@ class Jeu
         return $this;
     }
 
-    public function addAllScores(): self
+    public function addAllScores($score=0): self
     {
         foreach ($this->getPlayers() as $player) {
-            $player->addScore($this->score/2);
+            if ($score == 0){
+                $player->addScore($this->score/2);
+            }else{
+                $player->addScore($score/2);
+            }
         }
         return $this;
     }

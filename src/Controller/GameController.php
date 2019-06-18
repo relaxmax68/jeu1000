@@ -13,6 +13,7 @@ use App\Entity\Player;
 use App\Repository\QuestionRepository;
 use App\Repository\LevelRepository;
 use App\Repository\PlayerRepository;
+use Doctrine\Common\Persistence\ObjectManager;
 
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
@@ -109,7 +110,7 @@ class GameController extends AbstractController
 	 * @return Response
 	 *
 	 */
-	public function question(LevelRepository $level, $score): Response
+	public function question(ObjectManager $em, LevelRepository $level, $score): Response
 	{
 		$step = $this->session->get('step');
 		$points = $this->session->get('points');
@@ -157,8 +158,12 @@ class GameController extends AbstractController
 				if ($this->session->get('jeu')->getSteps()[$step]->getQuestion()->getLevel()->getId() == 5 ) {
 
 					$this->session->set('bank',$this->session->get('bank')-1000);
-					$this->session->get('jeu')->addAllScores();
+					$this->session->get('jeu')->addAllScores(1000);
+					$em->flush();
+					$em->persist($this->session->get('jeu'));
 					$this->session->set('contexte',"fin");					
+
+					dump($this->session->get('jeu'));
 
 					return $this->render('accueil.html.twig',[
 						'players'=> $this->session->get('jeu')->getPlayers(),
@@ -216,9 +221,9 @@ dump($contexte);
 					}
 				}
 			}
-			if( $contexte == "choix" ){//non
+			if( $contexte == "choix" ){//non je préfère conserver mes gains
 				dump($contexte);
-				$this->session->set('bank',$this->session->get('bank')+$this->session->get('jeu')->getScore());
+				$this->session->set('bank',$this->session->get('bank')-$this->session->get('jeu')->getScore());
 				$this->session->get('jeu')->addAllScores();
 				return $this->redirectToRoute('new_game',[],301);
 			}
