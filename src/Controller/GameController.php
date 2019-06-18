@@ -120,6 +120,12 @@ class GameController extends AbstractController
 	public function question(LevelRepository $level): Response
 	{
 		$step = $this->session->get('step');
+
+		//on enregistre les résultats
+		
+		
+
+		// on prépare la prochaine question
 		$step++;
 		$this->session->set('step',$step);
 
@@ -135,16 +141,6 @@ class GameController extends AbstractController
 			'status'  => $level->find($niveau)->getStatus(),
 			'score'   => $this->session->get('score'),
 			'question'=> $this->session->get('jeu')->getSteps()[$step]
-		]);
-	}
-	/**
-	 * @Route("/response", name="response")
-	 * @return Response
-	 *
-	 */
-	public function response(): Response
-	{
-		return $this->render('accueil.html.twig',[
 		]);
 	}
 }

@@ -35,7 +35,7 @@ class Player
 
     public function __construct()
     {
-        $this->name = "test";
+        $this->name = "Anonyme";
         $this->score = 0;
         $this->jeux = new ArrayCollection();
     }
