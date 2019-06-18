@@ -81,7 +81,7 @@ class GameController extends AbstractController
 		return $this->render('accueil.html.twig',[
 //			'players'=>$players,
 			'status' => 'light',
-			'niveau' => 'PAUSE',
+			'niveau' => 'Le jeu est prêt ! Cliquez ici pour passer aux étapes suivantes',
 			'score' => 0,
 			'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
 		]);

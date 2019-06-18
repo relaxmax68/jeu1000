@@ -5,6 +5,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class HomeController extends AbstractController
 {
@@ -15,9 +16,11 @@ class HomeController extends AbstractController
 	 */
 	public function index(): Response
 	{
+		session_unset();
+
 		return $this->render('accueil.html.twig',[
 			'status' => 'light',
-			'niveau' => 'PAUSE',
+			'niveau' => 'Cliquez ici pour commencer un nouveau jeu',
 			'score' => 0,
 			'question'=>['question'=>['question'=>"Voilà la question ?",'answer'=>"Voici la réponse !"]]
 		]);
