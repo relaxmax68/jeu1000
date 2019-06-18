@@ -21,6 +21,10 @@
 			<div class="btn-block btn-{{ status }} btn-lg text-center">{{ niveau }}</div>
 		</a>
 		<div class="btn-block btn-lg"></div>
+		<div class="progress" style="height: 3em">
+			<div class="progress-bar" role="progressbar" valuenow="0" aria-valuemin="0" aria-valuemax="30"></div>
+		</div>
+		<hr>
 		<div class="row">
 		  <div class="col-lg-6">
 		  	<div class="jumbotron">
@@ -52,10 +56,6 @@
 		  	<div class="btn-block btn-md"></div>
 		    <button class="btn-block btn-danger btn-lg text-center">Mauvaise réponse</button>
 		  </div>
-		</div>
-		<hr>
-		<div class="progress" style="height: 3em">
-			<div class="progress-bar" role="progressbar" valuenow="0" aria-valuemin="0" aria-valuemax="30"></div>
 		</div>
 	</div>
 {% endblock %}
