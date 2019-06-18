@@ -110,8 +110,10 @@ class GameController extends AbstractController
 	 * @return Response
 	 *
 	 */
-	public function question(ObjectManager $em, LevelRepository $level, $score): Response
+	public function question(LevelRepository $level, $score): Response
 	{
+		$em = $this->getDoctrine()->getManager();
+
 		$step = $this->session->get('step');
 		$points = $this->session->get('points');
 		$question = $this->session->get('question');
@@ -159,8 +161,9 @@ class GameController extends AbstractController
 
 					$this->session->set('bank',$this->session->get('bank')-1000);
 					$this->session->get('jeu')->addAllScores(1000);
+					$em->persist($this->session->get('jeu')->getPlayers()[0]);
+					$em->persist($this->session->get('jeu')->getPlayers()[1]);
 					$em->flush();
-					$em->persist($this->session->get('jeu'));
 					$this->session->set('contexte',"fin");					
 
 					dump($this->session->get('jeu'));
