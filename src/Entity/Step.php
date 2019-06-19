@@ -27,7 +27,7 @@ class Step
     private $question;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Jeu", inversedBy="steps", cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity="App\Entity\Jeu", inversedBy="steps")
      * @ORM\JoinColumn(nullable=false)
      */
     private $jeu;
