@@ -19,7 +19,7 @@
 			</h3>
 			<div>Montant en jeu : {{ score }} €</div>
 		</div>
-		<a href="{{ path('question', {score: 'none'})}}" hover:"color:white" visited:"color: white;">
+		<a href="{{ path('jeu')}}" hover:"color:white" visited:"color: white;">
 			<div class="btn-block btn-{{ status }} btn-lg text-center">{{ niveau }}</div>
 		</a>
 		<div class="btn-block btn-lg"></div>
@@ -41,7 +41,7 @@
 		  		</div>
 		  	</div>
 		    <div class="btn-block btn-md"></div>
-		    <a href="{{ path('question', {score: 'good'})}}"><div class="btn-block btn-success btn-lg text-center">{{ reponse|first }}</div></a>
+		    <a href="{{ path('reponse', {reponse: 'good'})}}"><div class="btn-block btn-success btn-lg text-center">{{ reponse|first }}</div></a>
 		  </div>
 		  <div class="col-lg-6">
 		  	<div class="jumbotron">
@@ -56,7 +56,7 @@
 		  		</div>
 		  	</div>
 		  	<div class="btn-block btn-md"></div>
-		    <a href="{{ path('question', {score: 'bad'})}}"><div class="btn-block btn-danger btn-lg text-center">{{ reponse|last }}</div></a>
+		    <a href="{{ path('reponse', {reponse: 'bad'})}}"><div class="btn-block btn-danger btn-lg text-center">{{ reponse|last }}</div></a>
 		  </div>
 		</div>
 	</div>

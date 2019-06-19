@@ -35,16 +35,15 @@ class StepRepository extends ServiceEntityRepository
         ;
     }
     */
-
-    /*
-    public function findOneBySomeField($value): ?Step
+    public function findOneBySuite($jeu, $suite): ?Step
     {
         return $this->createQueryBuilder('s')
-            ->andWhere('s.exampleField = :val')
-            ->setParameter('val', $value)
+            ->andWhere('s.suite = :suite')
+            ->andWhere('s.jeu = :jeu')
+            ->setParameter('suite', $suite)
+            ->setParameter('jeu', $jeu)
             ->getQuery()
             ->getOneOrNullResult()
         ;
     }
-    */
 }

@@ -35,6 +35,7 @@ class Level
 
     /**
      * @ORM\Column(type="string", length=20)
+     * représente la couleur de la question
      */
     private $status;
 

@@ -36,6 +36,12 @@ class Question
      */
     private $level;
 
+    public function __construct()
+    {
+        $this->question="q";
+        $this->answer="a";
+    }
+
     public function __toString()
     {
         return $this->question;

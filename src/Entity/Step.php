@@ -27,14 +27,13 @@ class Step
     private $question;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Jeu", inversedBy="steps")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Jeu", inversedBy="steps", cascade={"persist"})
      * @ORM\JoinColumn(nullable=false)
      */
     private $jeu;
 
-    public function __construct($suite,$question)
+    public function __construct($question)
     {
-        $this->suite=$suite;
         $this->question=$question;
     }
 
