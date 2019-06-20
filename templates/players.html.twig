@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Jeu des 1000€{% endblock %}
+
+{% block body %}
+	<div class="container mt-5">
+	<h1>Changer les joueurs</h1>
+
+	{{ form_start(form) }}
+	<button class="btn btn-primary">{{ button|default('Enregistrer')}}</button>
+	{{ form_end(form) }}
+
+
+	</div>
+{% endblock %}

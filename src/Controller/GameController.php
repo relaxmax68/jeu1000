@@ -3,6 +3,7 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
 
@@ -10,11 +11,17 @@ use App\Entity\Jeu;
 use App\Entity\Step;
 use App\Entity\Player;
 use App\Entity\Question;
+use App\Entity\Duo;
 
 use App\Repository\QuestionRepository;
 use App\Repository\LevelRepository;
 use App\Repository\PlayerRepository;
 use App\Repository\StepRepository;
+use App\Repository\JeuRepository;
+use App\Repository\DuoRepository;
+
+use App\Form\DuoType;
+
 use Doctrine\Common\Persistence\ObjectManager;
 
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -38,13 +45,14 @@ class GameController extends AbstractController
 	{
 		$jeu = new Jeu();
 		$steps = array();array_push($steps,0);
+		$players = array();
 
 		//représente le niveau de question atteint par les joueurs
 		$this->session->set('juste',0);
 		$this->session->set('score',0);
 		$this->session->set('niveau',0);
 		$this->session->set('contexte',"jeu");
-
+		
 		$nb_bleues = $q->findAllByLevel(1);
 		$nb_blanches = $q->findAllByLevel(2);
 		$nb_rouges = $q->findAllByLevel(3);
@@ -57,11 +65,14 @@ class GameController extends AbstractController
 		for ($i = 0; $i <2 ; $i++) {
 			if(empty($nb_players)){
 				$jeu->addPlayer(new Player());
+				array_push($players,0);
 			} else {
 				$jeu->addPlayer($nb_players[0]);
 				array_shift($nb_players);
+				array_push($players, $nb_players[0]->getId());
 			}
 		}
+		$this->session->set('players', $players);
 
 		//sélection des questions bleues
 		if(!empty($nb_bleues)){
@@ -104,6 +115,9 @@ class GameController extends AbstractController
 			$jeu->addStep($step);
 			array_push($steps,8);	
 		}
+
+		$em = $this->getDoctrine()->getManager();
+		$em->persist($jeu);
 
 		$this->session->set('jeu', $jeu);
 		$this->session->set('steps', $steps);
@@ -238,7 +252,7 @@ class GameController extends AbstractController
 
 				//la banque prends ses gains
 				$perte = $this->session->get('jeu')->getScore();
-				$this->session->set('bank',$this->session->get('bank')-$perte);
+				$this->session->set('bank',$this->session->get('bank')+$perte);
 
 				$this->init();
 
@@ -247,7 +261,7 @@ class GameController extends AbstractController
 				return $this->render('accueil.html.twig',[
 					'players'=> $this->session->get('jeu')->getPlayers(),
 					'status' => 'info',
-					'niveau' => "* Vous n'avez pas suffisemment de bonnes réponses. Vous avez perdu ! *",
+					'niveau' => "* Vous n'avez pas suffisemment de bonnes réponses. Vous avez perdu cette partie ! *",
 					'score' => 0,
 					'banque' => $this->session->get('bank'),
 					'reponse' =>['Nouveau Jeu', 'Arrêter'],				
@@ -289,10 +303,6 @@ class GameController extends AbstractController
 			$this->session->set('bank',$this->session->get('bank')-1000);
 			$this->session->get('jeu')->addAllScores(1000);
 
-			//$this->session->get('jeu')->getPlayers()[0]->setScore(2222);
-			//$this->session->get('jeu')->getPlayers()[1]->setScore(2222);
-			//$em->persist($this->session->get('jeu')->getPlayers()[1]);
-	
 			$em->flush();
 			$this->session->set('contexte',"fin");		
 						dump($niveau, $this->session->get('steps'), $this->session->get('juste'),$this->session->get('jeu'), $this->session->get('contexte'));			
@@ -370,6 +380,48 @@ class GameController extends AbstractController
 			'reponse' =>['Bonne réponse', 'Mauvaise réponse'],					
 			'question'=>['question'=>['question'=>"Voilà la question ?",'answer'=>"Voici la réponse !"]],
 			'players'=>["Joueur 1", "Joueur 2"]
+		]);
+	}
+
+	/**
+	 * @Route("/players", name="players")
+	 * @return Response
+	 * pour modifier les joueurs sélectionnés
+	 */
+	public function players(JeuRepository $j, PlayerRepository $p, Request $request): Response
+	{
+		$em = $this->getDoctrine()->getManager();
+		$jeu = $this->session->get('jeu');
+		$players = $this->session->get('players');
+		$duo = new Duo();
+		//$em->persist($p->find($this->session->get('jeu')->getPlayers()[0]));
+		//$em->persist($p->find($this->session->get('jeu')->getPlayers()[1]));
+
+		$form = $this->createForm(DuoType::class, $duo);
+		$form->handleRequest($request);
+
+		if ($form->isSubmitted() && $form->isValid()) {
+			$em->persist($duo);
+
+			$jeu->removePlayers();
+			
+			$jeu->addPlayer($duo->getPlayer1());
+			$jeu->addPlayer($duo->getPlayer2());
+			array_push($players,$duo->getPlayer1()->getId());
+			array_push($players,$duo->getPlayer2()->getId());
+
+			$this->session->set('players', $players);
+			$this->session->set('jeu', $jeu);
+			$this->session->set('contexte', "jeu");
+
+			return $this->redirectToRoute('jeu');
+		}
+
+		return $this->render('players.html.twig', [
+			'banque' => $this->session->get('bank'),			
+			'players'=> $this->session->get('jeu')->getPlayers(),			
+			'jeu' => $jeu,
+			'form' => $form->createView()
 		]);
 	}
 

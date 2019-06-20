@@ -121,6 +121,13 @@ class Jeu
         return $this;
     }
 
+    public function removePlayers(): self
+    {
+        $this->players = new ArrayCollection();
+
+        return $this;
+    }
+
     /**
      * @return Collection|Step[]
      */
