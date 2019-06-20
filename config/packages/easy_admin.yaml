@@ -3,7 +3,7 @@ easy_admin:
         # List the entity class name you want to manage
         Level:
           class: App\Entity\Level
-          form:
+          list:
             fields:
               - {property: 'name'}
               - {property: 'duration'}        
@@ -13,8 +13,8 @@ easy_admin:
           class: App\Entity\Question
         Player:
           class: App\Entity\Player
-          form:
+          list:
             fields:
-              - {property: 'name'}
+              - {property: 'name' }
               - {property: 'score'} 
-
+            sort: ['name', 'ASC']
