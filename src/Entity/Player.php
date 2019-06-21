@@ -33,11 +33,17 @@ class Player
      */
     private $jeux;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $available;
+
     public function __construct()
     {
         $this->name = "Anonyme";
         $this->score = 0;
         $this->jeux = new ArrayCollection();
+        $this->available = true;
     }
 
     public function __toString()
@@ -105,6 +111,18 @@ class Player
             $this->jeux->removeElement($jeux);
             $jeux->removePlayer($this);
         }
+
+        return $this;
+    }
+
+    public function getAvailable(): ?bool
+    {
+        return $this->available;
+    }
+
+    public function setAvailable(bool $available): self
+    {
+        $this->available = $available;
 
         return $this;
     }

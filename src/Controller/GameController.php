@@ -340,9 +340,11 @@ class GameController extends AbstractController
 	 * @return Response
 	 *
 	 */
-	public function init_scores(PlayerRepository $p, ObjectManager $em): Response
+	public function init_scores(PlayerRepository $p): Response
 	{
 		$players = $p->findAll();
+		$em = $this->getDoctrine()->getManager();
+
 		foreach ($players as $player) {
 			$player->setScore(0);
 			$em->persist($player);
@@ -397,7 +399,7 @@ class GameController extends AbstractController
 		return $this->render('accueil.html.twig',[
 			'players'=> $this->session->get('jeu')->getPlayers(),
 			'status' => 'info',
-			'niveau' => "* Vous n'avez pas suffisemment de bonnes réponses. Vous avez perdu cette partie ! *",
+			'niveau' => "* Vous avez perdu cette partie et tous vos gains sont allés à la banque ! *",
 			'score' => 0,
 			'banque' => $this->session->get('bank'),
 			'reponse' =>['Nouveau Jeu', 'Arrêter'],				
@@ -444,8 +446,6 @@ class GameController extends AbstractController
 		$jeu = $this->session->get('jeu');
 		$players = $this->session->get('players');
 		$duo = new Duo();
-		//$em->persist($p->find($this->session->get('jeu')->getPlayers()[0]));
-		//$em->persist($p->find($this->session->get('jeu')->getPlayers()[1]));
 
 		$form = $this->createForm(DuoType::class, $duo);
 		$form->handleRequest($request);

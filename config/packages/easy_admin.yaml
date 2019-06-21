@@ -17,4 +17,5 @@ easy_admin:
             fields:
               - {property: 'name' }
               - {property: 'score'} 
+              - {property: 'available'} 
             sort: ['name', 'ASC']

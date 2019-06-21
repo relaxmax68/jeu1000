@@ -20,12 +20,25 @@ class PlayerRepository extends ServiceEntityRepository
     }
 
     /**
+     * return Player[]
+     */
+
+    public function findAll(): Array 
+    {   
+        return $this->createQueryBuilder('p')
+            ->where('p.available = true')
+            ->getQuery()
+            ->getResult()
+            ;
+    }
+
+    /**
      * @return Player[] Returns an array of Player objects
      */
-    
     public function findSorted()
     {
         return $this->createQueryBuilder('p')
+            ->where('p.available = true')
             ->orderBy('p.score', 'DESC')
             ->getQuery()
             ->getResult()
