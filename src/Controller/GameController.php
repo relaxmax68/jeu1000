@@ -336,6 +336,22 @@ class GameController extends AbstractController
 		]);
 	}
 	/**
+	 * @Route("/init_scores", name="init_scores")
+	 * @return Response
+	 *
+	 */
+	public function init_scores(PlayerRepository $p, ObjectManager $em): Response
+	{
+		$players = $p->findAll();
+		foreach ($players as $player) {
+			$player->setScore(0);
+			$em->persist($player);
+		}
+		$em->flush();
+
+		return $this->redirectToRoute('scores',[],301);
+	}
+	/**
 	 * @Route("/gains/{gains}", name="gains")
 	 * @return Response
 	 *
