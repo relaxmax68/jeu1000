@@ -51,6 +51,7 @@ class GameController extends AbstractController
 		$this->session->set('juste',0);
 		$this->session->set('score',0);
 		$this->session->set('niveau',0);
+		$this->session->set('chance',0);
 		$this->session->set('contexte',"jeu");
 		
 		$nb_bleues = $q->findAllByLevel(1);
@@ -113,7 +114,6 @@ class GameController extends AbstractController
 		if(!empty($nb_supers)){
 			$step = new Step($nb_supers[random_int(0, count($nb_supers)-1)]);
 			$jeu->addStep($step);
-			array_push($steps,8);	
 		}
 
 		$em = $this->getDoctrine()->getManager();
@@ -154,7 +154,7 @@ class GameController extends AbstractController
 			$this->session->set('niveau',$niveau);
 			$this->session->set('gain',$level->find($niveau)->getScore());
 
-			dump($this->session->get('niveau'),$niveau, $this->session->get('steps'), $this->session->get('juste'),$this->session->get('jeu'), $this->session->get('contexte'));
+			dump($this->session->get('niveau'),$niveau, $this->session->get('steps'), $this->session->get('juste'),$this->session->get('jeu'));
 
 			return $this->render('accueil.html.twig',[
 				'players' => $this->session->get('jeu')->getPlayers(),
@@ -199,7 +199,7 @@ class GameController extends AbstractController
 			}
 
 			$this->session->set('steps', $steps);
-			return $this->redirectToRoute('jeu',[],301);
+			return $this->redirectToRoute('jeu',['reponse' => $reponse ],301);
 		}
 		
 		if( $contexte == "choix" ){
@@ -227,10 +227,10 @@ class GameController extends AbstractController
 		}
 	}
 	/**
-	 * @Route("/jeu", name="jeu")
+	 * @Route("/jeu/{reponse}", name="jeu")
 	 * on teste si le jeu doit continuer et on comptabilise les points
 	 */
-	public function jeu()
+	public function jeu($reponse="")
 	{
 		$em = $this->getDoctrine()->getManager();
 
@@ -238,7 +238,7 @@ class GameController extends AbstractController
 		$steps = $this->session->get('steps');
 
 		//oui sauf si aucun jeu n'est lancé ou un jeu terminé
-		if( is_null($this->session->get('jeu')) || count($steps)==0 ){
+		if( is_null($this->session->get('jeu')) ){
 			return $this->redirectToRoute('new_game',[],301);
 		}
 
@@ -248,25 +248,22 @@ class GameController extends AbstractController
 		//assez de bonnes réponses ?
 		if ($niveau == 3) {
 
+			//est-ce qu'il y a des questions à reprendre ?
+			if ( count($steps) > 2 && $this->session->get('chance') == 0) {
+				for ($i = 0; $i < 2; $i++) { //on remet les questions bancos à la fin
+					$step = array_shift($steps);
+					array_push($steps, $step);
+				}
+
+				$this->session->set('steps',$steps);
+				$this->session->set('niveau',6);
+				$this->session->set('chance',1);
+
+				return $this->redirectToRoute('question',[],301);
+			}
+
 			if ($this->session->get('juste') < 5){//pas assez de bonnes réponses
-
-				//la banque prends ses gains
-				$perte = $this->session->get('jeu')->getScore();
-				$this->session->set('bank',$this->session->get('bank')+$perte);
-
-				$this->init();
-
-				$this->session->set('contexte',"fin");
-
-				return $this->render('accueil.html.twig',[
-					'players'=> $this->session->get('jeu')->getPlayers(),
-					'status' => 'info',
-					'niveau' => "* Vous n'avez pas suffisemment de bonnes réponses. Vous avez perdu cette partie ! *",
-					'score' => 0,
-					'banque' => $this->session->get('bank'),
-					'reponse' =>['Nouveau Jeu', 'Arrêter'],				
-					'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
-				]);
+	        	return $this->redirectToRoute('pertes',[],301);
 			}else{
 				$this->session->set('contexte',"choix");
 
@@ -285,29 +282,41 @@ class GameController extends AbstractController
 		}
 
 		if ($niveau == 4) {
-			$this->session->set('contexte',"choix");
 
-			return $this->render('accueil.html.twig',[
-                'players'=> $this->session->get('jeu')->getPlayers(),
-                'status' => 'warning',
-                'niveau' => "Vous avez gagné 500€ ! Super Banco ?",
-                'score' => '500',
-                'banque' => $this->session->get('bank'),
-                'reponse' =>['Oui', 'Non'],                                     
-                'question'=>['question'=>['question'=>"Si vous gagnez, vous doublez vos gains ?",'answer'=>"Si vous perdez, vous perdez tout."]]                            
-            ]);
+			if ( $reponse == "good" ){
+
+				$this->session->set('contexte',"choix");
+
+				return $this->render('accueil.html.twig',[
+	                'players'=> $this->session->get('jeu')->getPlayers(),
+	                'status' => 'warning',
+	                'niveau' => "Vous avez gagné 500€ ! Super Banco ?",
+	                'score' => '500',
+	                'banque' => $this->session->get('bank'),
+	                'reponse' =>['Oui', 'Non'],                                     
+	                'question'=>['question'=>['question'=>"Si vous gagnez, vous doublez vos gains ?",'answer'=>"Si vous perdez, vous perdez tout."]]                            
+	            ]);
+	        } else {
+	        	return $this->redirectToRoute('pertes',[],301);
+	        }
+
 		}
 
 		if ($niveau == 5){
 
-			$this->session->set('bank',$this->session->get('bank')-1000);
-			$this->session->get('jeu')->addAllScores(1000);
+			if ( $reponse == "good" ){
 
-			$em->flush();
-			$this->session->set('contexte',"fin");		
-						dump($niveau, $this->session->get('steps'), $this->session->get('juste'),$this->session->get('jeu'), $this->session->get('contexte'));			
+				$this->session->set('bank',$this->session->get('bank')-1000);
+				$this->session->get('jeu')->addAllScores(1000);
 
-			return $this->redirectToRoute('gains',['gains'=> 1000],301);
+				$em->flush();
+				$this->session->set('contexte',"fin");		
+							dump($niveau, $this->session->get('steps'), $this->session->get('juste'),$this->session->get('jeu'), $this->session->get('contexte'));			
+
+				return $this->redirectToRoute('gains',['gains'=> 1000],301);
+			}else{
+				return $this->redirectToRoute('pertes',[],301);
+			}
 			
 		}
 		return $this->redirectToRoute('bug',[],301);
@@ -351,6 +360,31 @@ class GameController extends AbstractController
 			'score'   => $this->session->get('jeu')->getScore(),
 			'banque' => $this->session->get('bank'),
 			'reponse' =>['Nouveau Jeu', 'Scores'],
+			'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
+		]);
+	}
+	/**
+	 * @Route("/pertes", name="pertes")
+	 * @return Response
+	 *
+	 */
+	public function pertes (){
+
+		//la banque prend ses gains
+		$perte = $this->session->get('jeu')->getScore();
+		$this->session->set('bank',$this->session->get('bank')+$perte);
+
+		$this->init();
+
+		$this->session->set('contexte',"fin");
+
+		return $this->render('accueil.html.twig',[
+			'players'=> $this->session->get('jeu')->getPlayers(),
+			'status' => 'info',
+			'niveau' => "* Vous n'avez pas suffisemment de bonnes réponses. Vous avez perdu cette partie ! *",
+			'score' => 0,
+			'banque' => $this->session->get('bank'),
+			'reponse' =>['Nouveau Jeu', 'Arrêter'],				
 			'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
 		]);
 	}
@@ -432,6 +466,7 @@ class GameController extends AbstractController
 		$this->session->get('jeu')->addPlayer(new Player());
 		$this->session->get('jeu')->addPlayer(new Player());
 		$this->session->set('question',0);
+		$this->session->set('chance',0);
 		$this->session->set('contexte',"pause");
 	}
 
