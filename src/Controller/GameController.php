@@ -154,8 +154,6 @@ class GameController extends AbstractController
 			$this->session->set('niveau',$niveau);
 			$this->session->set('gain',$level->find($niveau)->getScore());
 
-			dump($this->session->get('niveau'),$niveau, $this->session->get('steps'), $this->session->get('juste'),$this->session->get('jeu'));
-
 			return $this->render('accueil.html.twig',[
 				'players' => $this->session->get('jeu')->getPlayers(),
 				'niveau'  => $level->find($niveau),
@@ -267,8 +265,6 @@ class GameController extends AbstractController
 			}else{
 				$this->session->set('contexte',"choix");
 
-				dump($niveau, $this->session->get('steps'), $this->session->get('juste'),$this->session->get('jeu'), $this->session->get('contexte'));
-
 				return $this->render('accueil.html.twig',[
 					'players'=> $this->session->get('jeu')->getPlayers(),
 					'status' => 'warning',
@@ -311,7 +307,6 @@ class GameController extends AbstractController
 
 				$em->flush();
 				$this->session->set('contexte',"fin");		
-							dump($niveau, $this->session->get('steps'), $this->session->get('juste'),$this->session->get('jeu'), $this->session->get('contexte'));			
 
 				return $this->redirectToRoute('gains',['gains'=> 1000],301);
 			}else{
@@ -422,8 +417,6 @@ class GameController extends AbstractController
 			$bank = $this->session->get('bank');
 		}
 
-		dump($this->session->get('niveau'), $this->session->get('steps'), $this->session->get('juste'),$this->session->get('jeu'), $this->session->get('contexte'));
-
 		return $this->render('accueil.html.twig',[
 			'status' => 'light',
 			'niveau' => 'Cliquez ici pour commencer un nouveau jeu',
@@ -494,13 +487,6 @@ class GameController extends AbstractController
 	public function bug(PlayerRepository $p): Response
 	{
 		$em = $this->getDoctrine()->getManager();
-
-		//$p->find($this->session->get('jeu')->getPlayers()[0]->getId())->addScore(1000);
-		//$p->find($this->session->get('jeu')->getPlayers()[1]->getId())->addScore(1000);
-		//dump($p->find($this->session->get('jeu')->getPlayers()[0]->getId()));
-		//dump($p->find($this->session->get('jeu')->getPlayers()[1]->getId()));
-
-		//$em->flush();
 
 		return $this->render('bug.html.twig',[
 			'banque' => $this->session->get('bank'),			
