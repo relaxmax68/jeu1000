@@ -43,16 +43,16 @@ class GameController extends AbstractController
 	 */
 	public function new(PlayerRepository $p, QuestionRepository $q): Response
 	{
-		$jeu = new Jeu();
-		$steps = array();array_push($steps,0);
-		$players = array();
+		$jeu = new Jeu();//une manche du jeu
+		$steps = array();array_push($steps,0);//étapes du jeu
+		$players = array();//joueurs
 
 		//représente le niveau de question atteint par les joueurs
-		$this->session->set('juste',0);
-		$this->session->set('score',0);
-		$this->session->set('niveau',0);
-		$this->session->set('chance',0);
-		$this->session->set('contexte',"jeu");
+		$this->session->set('juste',0);//nombre de réponses justes
+		$this->session->set('score',0);//score atteint par les joueurs
+		$this->session->set('niveau',0);//niveau atteint par les joueurs
+		$this->session->set('chance',0);//une deuxième chance est donnée à chague question
+		$this->session->set('contexte',"jeu");//contexte de jeu : pause / questions / banco
 		
 		$nb_bleues = $q->findAllByLevel(1);
 		$nb_blanches = $q->findAllByLevel(2);
@@ -77,11 +77,12 @@ class GameController extends AbstractController
 
 		//sélection des questions bleues
 		if(!empty($nb_bleues)){
+
+			//on sélectionne 3 questions au hasard
+			$rand_nb_bleues = array_rand($nb_bleues,3);
+
 			for ($i = 1; $i < 4 ; $i++) {
-				$step = new Step($nb_bleues[random_int(0, count($nb_bleues)-1)]);
-				while ($jeu->getSteps()->contains($step)) {
-					$step = new Step($nb_bleues[random_int(0, count($nb_bleues)-1)]);
-				}
+				$step = new Step($nb_bleues[$rand_nb_bleues[ $i-1 ]]);
 				$jeu->addStep($step);
 				array_push($steps,$i);
 			}
@@ -142,6 +143,7 @@ class GameController extends AbstractController
 	{
 		$contexte = $this->session->get('contexte');
 
+			dump($this->session->get('jeu'));
 
 		if( $contexte == "pause" ){
 			return $this->redirectToRoute('new_game',[],301);

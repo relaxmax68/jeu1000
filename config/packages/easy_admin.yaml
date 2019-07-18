@@ -1,21 +1,28 @@
 easy_admin:
-    entities:
-        # List the entity class name you want to manage
-        Level:
-          class: App\Entity\Level
-          list:
-            fields:
-              - {property: 'name'}
-              - {property: 'duration'}        
-              - {property: 'status'}        
-              - {property: 'score'}        
-        Question:
-          class: App\Entity\Question
-        Player:
-          class: App\Entity\Player
-          list:
-            fields:
-              - {property: 'name' }
-              - {property: 'score'} 
-              - {property: 'available'} 
-            sort: ['name', 'ASC']
+  entities:
+      # List the entity class name you want to manage
+      Level:
+        class: App\Entity\Level
+        list:
+          fields:
+            - {property: 'name'}
+            - {property: 'duration'}        
+            - {property: 'status'}        
+            - {property: 'score'}        
+      Question:
+        class: App\Entity\Question
+      Player:
+        class: App\Entity\Player
+        list:
+          fields:
+            - {property: 'name' }
+            - {property: 'score'} 
+            - {property: 'available'} 
+          sort: ['name', 'ASC']
+  design:
+    menu:
+      - Level
+      - Question
+      - Player
+      - { label: '-' }
+      - { label: 'home', icon: 'home', route: 'home' }
