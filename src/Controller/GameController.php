@@ -31,9 +31,11 @@ class GameController extends AbstractController
 {
 	private $session;
 
-	public function __construct(SessionInterface $session)
+	public function __construct(SessionInterface $session, PlayerRepository $p,QuestionRepository $q)
 	{
 		$this->session = $session;
+		$this->q = $q;
+		$this->p = $p;
 	}
 
 	/**
@@ -41,87 +43,15 @@ class GameController extends AbstractController
 	 * @return Response
 	 *
 	 */
-	public function new(PlayerRepository $p, QuestionRepository $q): Response
+	public function new(): Response
 	{
-		$jeu = new Jeu();//une manche du jeu
-		$steps = array();array_push($steps,0);//étapes du jeu
-		$players = array();//joueurs
-
-		//représente le niveau de question atteint par les joueurs
 		$this->session->set('juste',0);//nombre de réponses justes
 		$this->session->set('score',0);//score atteint par les joueurs
 		$this->session->set('niveau',0);//niveau atteint par les joueurs
 		$this->session->set('chance',0);//une deuxième chance est donnée à chague question
 		$this->session->set('contexte',"jeu");//contexte de jeu : pause / questions / banco
 		
-		$nb_bleues = $q->findAllByLevel(1);
-		$nb_blanches = $q->findAllByLevel(2);
-		$nb_rouges = $q->findAllByLevel(3);
-		$nb_bancos = $q->findAllByLevel(4);
-		$nb_supers = $q->findAllByLevel(5);
-		$nb_players = $p->findAll();
-		shuffle($nb_players);
-
-		// sélection des joueurs
-		for ($i = 0; $i <2 ; $i++) {
-			if(empty($nb_players)){
-				$jeu->addPlayer(new Player());
-				array_push($players,0);
-			} else {
-				$jeu->addPlayer($nb_players[0]);
-				array_shift($nb_players);
-				array_push($players, $nb_players[0]->getId());
-			}
-		}
-		$this->session->set('players', $players);
-
-		//sélection des questions bleues
-		if(!empty($nb_bleues)){
-
-			//on sélectionne 3 questions au hasard
-			$rand_nb_bleues = array_rand($nb_bleues,3);
-
-			for ($i = 1; $i < 4 ; $i++) {
-				$step = new Step($nb_bleues[$rand_nb_bleues[ $i-1 ]]);
-				$jeu->addStep($step);
-				array_push($steps,$i);
-			}
-		}
-		//sélection des questions blanches
-		if(!empty($nb_blanches)){		
-			for ($i = 4; $i < 6 ; $i++) {
-				$step = new Step($nb_blanches[random_int(0, count($nb_blanches)-1)]);
-				while ($jeu->getSteps()->contains($step)) {
-					$step = new Step($nb_blanches[random_int(0, count($nb_blanches)-1)]);
-				}
-				$jeu->addStep($step);
-				array_push($steps,$i);
-			}
-		}
-		//sélection de la question rouge
-		if(!empty($nb_rouges)){
-			$step = new Step($nb_rouges[random_int(0, count($nb_rouges)-1)]);
-			$jeu->addStep($step);
-			array_push($steps,6);
-		}
-
-		//sélection de la question banco
-		if(!empty($nb_bancos)){
-			$step = new Step($nb_bancos[random_int(0, count($nb_bancos)-1)]);
-			$jeu->addStep($step);
-			array_push($steps,7);			
-		}
-		//sélection de la question super banco
-		if(!empty($nb_supers)){
-			$step = new Step($nb_supers[random_int(0, count($nb_supers)-1)]);
-			$jeu->addStep($step);
-		}
-
-		$em = $this->getDoctrine()->getManager();
-		$em->persist($jeu);
-
-		$this->session->set('jeu', $jeu);
-		$this->session->set('steps', $steps);
+		$this->preparation();
 
 		return $this->render('accueil.html.twig',[
 			'players'=> $this->session->get('jeu')->getPlayers(),
@@ -323,9 +253,9 @@ class GameController extends AbstractController
 	 * @return Response
 	 *
 	 */
-	public function scores(PlayerRepository $p): Response
+	public function scores(): Response
 	{
-		$players = $p->findSorted();
+		$players = $this->p->findSorted();
 
 		return $this->render('scores.html.twig',[
 			'banque' => $this->session->get('bank'),			
@@ -337,9 +267,9 @@ class GameController extends AbstractController
 	 * @return Response
 	 *
 	 */
-	public function init_scores(PlayerRepository $p): Response
+	public function init_scores(): Response
 	{
-		$players = $p->findAll();
+		$players = $this->p->findAll();
 		$em = $this->getDoctrine()->getManager();
 
 		foreach ($players as $player) {
@@ -355,7 +285,7 @@ class GameController extends AbstractController
 	 * @return Response
 	 *
 	 */
-	public function gains($gains, PlayerRepository $p): Response
+	public function gains($gains): Response
 	{
 		$this->session->set('contexte',"fin");
 
@@ -435,7 +365,7 @@ class GameController extends AbstractController
 	 * @return Response
 	 * pour modifier les joueurs sélectionnés
 	 */
-	public function players(JeuRepository $j, PlayerRepository $p, Request $request): Response
+	public function players(JeuRepository $j, Request $request): Response
 	{
 		$em = $this->getDoctrine()->getManager();
 		$jeu = $this->session->get('jeu');
@@ -479,6 +409,82 @@ class GameController extends AbstractController
 		$this->session->set('question',0);
 		$this->session->set('chance',0);
 		$this->session->set('contexte',"pause");
+	}
+
+	private function preparation(){
+
+		$jeu = new Jeu();//une manche du jeu
+		$steps = array();array_push($steps,0);//étapes du jeu
+		$players = array();//joueurs
+
+		$nb_bleues = $this->q->findAllByLevel(1);
+		$nb_blanches = $this->q->findAllByLevel(2);
+		$nb_rouges = $this->q->findAllByLevel(3);
+		$nb_bancos = $this->q->findAllByLevel(4);
+		$nb_supers = $this->q->findAllByLevel(5);
+		$nb_players = $this->p->findAll();
+		shuffle($nb_players);
+
+		// sélection des joueurs
+		for ($i = 0; $i <2 ; $i++) {
+			if(empty($nb_players)){
+				$jeu->addPlayer(new Player());
+				array_push($players,0);
+			} else {
+				$jeu->addPlayer($nb_players[0]);
+				array_shift($nb_players);
+				array_push($players, $nb_players[0]->getId());
+			}
+		}
+		$this->session->set('players', $players);
+
+		//sélection des questions bleues
+		if(!empty($nb_bleues)){
+
+			//on sélectionne 3 questions au hasard
+			$rand_nb_bleues = array_rand($nb_bleues,3);
+
+			for ($i = 1; $i < 4 ; $i++) {
+				$step = new Step($nb_bleues[$rand_nb_bleues[ $i-1 ]]);
+				$jeu->addStep($step);
+				array_push($steps,$i);
+			}
+		}
+		//sélection des questions blanches
+		if(!empty($nb_blanches)){		
+			for ($i = 4; $i < 6 ; $i++) {
+				$step = new Step($nb_blanches[random_int(0, count($nb_blanches)-1)]);
+				while ($jeu->getSteps()->contains($step)) {
+					$step = new Step($nb_blanches[random_int(0, count($nb_blanches)-1)]);
+				}
+				$jeu->addStep($step);
+				array_push($steps,$i);
+			}
+		}
+		//sélection de la question rouge
+		if(!empty($nb_rouges)){
+			$step = new Step($nb_rouges[random_int(0, count($nb_rouges)-1)]);
+			$jeu->addStep($step);
+			array_push($steps,6);
+		}
+
+		//sélection de la question banco
+		if(!empty($nb_bancos)){
+			$step = new Step($nb_bancos[random_int(0, count($nb_bancos)-1)]);
+			$jeu->addStep($step);
+			array_push($steps,7);			
+		}
+		//sélection de la question super banco
+		if(!empty($nb_supers)){
+			$step = new Step($nb_supers[random_int(0, count($nb_supers)-1)]);
+			$jeu->addStep($step);
+		}
+
+		$em = $this->getDoctrine()->getManager();
+		$em->persist($jeu);
+
+		$this->session->set('jeu', $jeu);
+		$this->session->set('steps', $steps);
 	}
 
 	/**
