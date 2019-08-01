@@ -402,7 +402,6 @@ class GameController extends AbstractController
 		$this->session->set('question',0);
 		$this->session->set('chance',0);
 		$this->session->set('contexte',"pause");
-		$this->initBank();
 	}
 
 	private function preparation(){
