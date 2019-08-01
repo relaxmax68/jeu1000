@@ -23,8 +23,8 @@ use App\Repository\DuoRepository;
 use App\Form\DuoType;
 
 use Doctrine\Common\Persistence\ObjectManager;
-
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\Cookie;
 
 
 class GameController extends AbstractController
@@ -58,7 +58,6 @@ class GameController extends AbstractController
 			'status' => 'light',
 			'niveau' => 'Le jeu est prêt ! Cliquez ici pour passer aux étapes suivantes',
 			'score'  => 0,
-			'banque' => $this->session->get('bank'),
 			'reponse' =>['Bonne réponse', 'Mauvaise réponse'],			
 			'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
 		]);
@@ -72,8 +71,6 @@ class GameController extends AbstractController
 	public function question(LevelRepository $level): Response
 	{
 		$contexte = $this->session->get('contexte');
-
-			dump($this->session->get('jeu'));
 
 		if( $contexte == "pause" ){
 			return $this->redirectToRoute('new_game',[],301);
@@ -91,7 +88,6 @@ class GameController extends AbstractController
 				'niveau'  => $level->find($niveau),
 				'status'  => $level->find($niveau)->getStatus(),
 				'score'   => $this->session->get('jeu')->getScore(),
-				'banque' => $this->session->get('bank'),
 				'reponse' =>['Bonne réponse', 'Mauvaise réponse'],
 				'question'=> $question
 			]);
@@ -140,7 +136,8 @@ class GameController extends AbstractController
 			}
 
 			if ( $reponse == "bad"){//non je préfère conserver mes gains
-				$this->session->set('bank',$this->session->get('bank')-$this->session->get('jeu')->getScore());
+				$this->saveBank(-$this->session->get('jeu')->getScore());
+
 				$this->session->get('jeu')->addAllScores();
 				return $this->redirectToRoute('gains',['gains'=> $this->session->get('jeu')->getScore()],301);
 			}
@@ -202,7 +199,6 @@ class GameController extends AbstractController
 					'status' => 'warning',
 					'niveau' => "Vous avez gagné ! ".$this->session->get('jeu')->getScore()." € ! Banco ?",
 					'score' => $this->session->get('jeu')->getScore(),
-					'banque' => $this->session->get('bank'),
 					'reponse' =>['Oui', 'Non'],					
 					'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
 				]);
@@ -220,7 +216,6 @@ class GameController extends AbstractController
 	                'status' => 'warning',
 	                'niveau' => "Vous avez gagné 500€ ! Super Banco ?",
 	                'score' => '500',
-	                'banque' => $this->session->get('bank'),
 	                'reponse' =>['Oui', 'Non'],                                     
 	                'question'=>['question'=>['question'=>"Si vous gagnez, vous doublez vos gains ?",'answer'=>"Si vous perdez, vous perdez tout."]]                            
 	            ]);
@@ -234,7 +229,8 @@ class GameController extends AbstractController
 
 			if ( $reponse == "good" ){
 
-				$this->session->set('bank',$this->session->get('bank')-1000);
+				$this->saveBank(-1000);
+
 				$this->session->get('jeu')->addAllScores(1000);
 
 				$em->flush();
@@ -258,7 +254,6 @@ class GameController extends AbstractController
 		$players = $this->p->findSorted();
 
 		return $this->render('scores.html.twig',[
-			'banque' => $this->session->get('bank'),			
 			'players'=> $players
 		]);
 	}
@@ -293,8 +288,8 @@ class GameController extends AbstractController
 
 		$gains=$gains/2;
 
-		$p->find($this->session->get('jeu')->getPlayers()[0]->getId())->addScore($gains);
-		$p->find($this->session->get('jeu')->getPlayers()[1]->getId())->addScore($gains);
+		$this->p->find($this->session->get('jeu')->getPlayers()[0]->getId())->addScore($gains);
+		$this->p->find($this->session->get('jeu')->getPlayers()[1]->getId())->addScore($gains);
 		
 		$em->flush();
 
@@ -303,7 +298,6 @@ class GameController extends AbstractController
 			'niveau'  => "*** Vous avez gagné chacun ".$gains." € ! ***",
 			'status'  => 'warning',
 			'score'   => $this->session->get('jeu')->getScore(),
-			'banque' => $this->session->get('bank'),
 			'reponse' =>['Nouveau Jeu', 'Scores'],
 			'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
 		]);
@@ -393,7 +387,6 @@ class GameController extends AbstractController
 		}
 
 		return $this->render('players.html.twig', [
-			'banque' => $this->session->get('bank'),			
 			'players'=> $this->session->get('jeu')->getPlayers(),			
 			'jeu' => $jeu,
 			'form' => $form->createView()
@@ -409,6 +402,7 @@ class GameController extends AbstractController
 		$this->session->set('question',0);
 		$this->session->set('chance',0);
 		$this->session->set('contexte',"pause");
+		$this->initBank();
 	}
 
 	private function preparation(){
@@ -492,14 +486,22 @@ class GameController extends AbstractController
 	 * @return Response
 	 *
 	 */
-	public function bug(PlayerRepository $p): Response
-	{
+	public function bug(PlayerRepository $p): Response{
 		$em = $this->getDoctrine()->getManager();
 
 		return $this->render('bug.html.twig',[
-			'banque' => $this->session->get('bank'),			
 			'players'=> $this->session->get('jeu')->getPlayers()
 		]);
+	}
+
+	private function saveBank(int $gain){
+		$request = new Request;
+
+		$bank = $request->cookies->get('bank');
+		$cookie = new Cookie('bank', $bank+$gain, time()+365*24*60*60);
+		$res = new Response;
+		$res->headers->setCookie($cookie);
+		$res->send();
 	}
 }
 ?>

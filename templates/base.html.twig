@@ -24,7 +24,7 @@
                   </div>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#"><b>Banque : {{ banque }} €</b></a>
+                <a class="nav-link" href="#"><b>Banque : {% if app.request.cookies.get('bank') %}{{ app.request.cookies.get('bank') }} €{% else %}0 €{% endif %}</b></a>
               </li>
             </ul>
             <div class="float-right"><span class="badge badge-light">il reste {{ compteur() }} question(s)</span></div>
