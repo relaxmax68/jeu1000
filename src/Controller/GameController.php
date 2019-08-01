@@ -311,7 +311,8 @@ class GameController extends AbstractController
 
 		//la banque prend ses gains
 		$perte = $this->session->get('jeu')->getScore();
-		$this->session->set('bank',$this->session->get('bank')+$perte);
+
+		$this->saveBank($perte);
 
 		$this->init();
 
@@ -322,7 +323,6 @@ class GameController extends AbstractController
 			'status' => 'info',
 			'niveau' => "* Vous avez perdu cette partie et tous vos gains sont allés à la banque ! *",
 			'score' => 0,
-			'banque' => $this->session->get('bank'),
 			'reponse' =>['Nouveau Jeu', 'Arrêter'],				
 			'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
 		]);
@@ -336,18 +336,10 @@ class GameController extends AbstractController
 	{
 		$this->init();
 
-		if( is_null($this->session->get('bank')) ){
-			$bank = 0;
-			$this->session->set('bank',0);
-		}else{
-			$bank = $this->session->get('bank');
-		}
-
 		return $this->render('accueil.html.twig',[
 			'status' => 'light',
 			'niveau' => 'Cliquez ici pour commencer un nouveau jeu',
 			'score' => 0,
-			'banque' => $bank,
 			'reponse' =>['Bonne réponse', 'Mauvaise réponse'],					
 			'question'=>['question'=>['question'=>"Voilà la question ?",'answer'=>"Voici la réponse !"]],
 			'players'=>["Joueur 1", "Joueur 2"]
