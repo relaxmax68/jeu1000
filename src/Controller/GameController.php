@@ -136,7 +136,7 @@ class GameController extends AbstractController
 			}
 
 			if ( $reponse == "bad"){//non je préfère conserver mes gains
-				$this->saveBank(-$this->session->get('jeu')->getScore());
+				$this->session->set('bank', $this->session->get('bank')-$this->session->get('jeu')->getScore());
 
 				$this->session->get('jeu')->addAllScores();
 				return $this->redirectToRoute('gains',['gains'=> $this->session->get('jeu')->getScore()],301);
@@ -229,12 +229,12 @@ class GameController extends AbstractController
 
 			if ( $reponse == "good" ){
 
-				$this->saveBank(-1000);
+				$this->session->set('bank', $this->session->get('bank')-1000);
 
 				$this->session->get('jeu')->addAllScores(1000);
 
 				$em->flush();
-				$this->session->set('contexte',"fin");		
+				$this->session->set('contexte',"fin");
 
 				return $this->redirectToRoute('gains',['gains'=> 1000],301);
 			}else{
@@ -276,6 +276,26 @@ class GameController extends AbstractController
 		return $this->redirectToRoute('scores',[],301);
 	}
 	/**
+	 * @Route("/init", name="init")
+	 * @return Response
+	 *
+	 */
+	public function initGame(): Response
+	{
+		session_unset();
+
+		$this->session->set('bank', 0);
+
+		return $this->render('accueil.html.twig',[
+			'status' => 'light',
+			'niveau' => 'Cliquez ici pour commencer un nouveau jeu',
+			'score' => 0,
+			'reponse' =>['Bonne réponse', 'Mauvaise réponse'],					
+			'question'=>['question'=>['question'=>"Voilà la question ?",'answer'=>"Voici la réponse !"]],
+			'players'=>["Joueur 1", "Joueur 2"]
+		]);
+	}
+	/**
 	 * @Route("/gains/{gains}", name="gains")
 	 * @return Response
 	 *
@@ -312,7 +332,7 @@ class GameController extends AbstractController
 		//la banque prend ses gains
 		$perte = $this->session->get('jeu')->getScore();
 
-		$this->saveBank($perte);
+		$this->session->set('bank', $this->session->get('bank')+$perte);
 
 		$this->init();
 
@@ -483,16 +503,6 @@ class GameController extends AbstractController
 		return $this->render('bug.html.twig',[
 			'players'=> $this->session->get('jeu')->getPlayers()
 		]);
-	}
-
-	private function saveBank(int $gain){
-		$request = new Request;
-
-		$bank = $request->cookies->get('bank');
-		$cookie = new Cookie('bank', $bank+$gain, time()+365*24*60*60);
-		$res = new Response;
-		$res->headers->setCookie($cookie);
-		$res->send();
 	}
 }
 ?>
