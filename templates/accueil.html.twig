@@ -15,8 +15,10 @@
 		<div class="jumbotron text-center">
 			<h1>"Jeu des 1000€"</h1>
 			<hr>
-			<h3 class="text-capitalize" style="font-size: 4rem;"><a href="{{ path('players') }}" id="players">{{ players|first}} & {{ players|last}}</a></h3>
+			{% if players is defined %}
+			<h3 class="text-capitalize" style="font-size: 4rem;"><a href="{{ path('players') }}" id="players">{{ players|keys|first}} & {{ players|keys|last}}</a></h3>
 			<div>Montant en jeu : {{ score }} €</div>
+			{% endif %}
 		</div>
 		<a href="{{ path('jeu')}}" hover:"color:white" visited:"color: white;">
 			<div class="btn-block btn-{{ status }} btn-lg text-center">{{ niveau }}</div>

@@ -41,7 +41,7 @@ class GameController extends AbstractController
 	 * @return Response
 	 *
 	 */
-	public function new(): Response
+	public function new(Request $request): Response
 	{
 		$this->session->set('juste',0);//nombre de réponses justes
 		$this->session->set('score',0);//score atteint par les joueurs
@@ -51,8 +51,11 @@ class GameController extends AbstractController
 		
 		$this->preparation();
 
+		$players = unserialize($request->cookies->get('jeu1000'));
+		$this->session->set('players', $players);		
+
 		return $this->render('accueil.html.twig',[
-			'players'=> $this->session->get('players'),
+			'players'=> $players,
 			'status' => 'light',
 			'niveau' => 'Le jeu est prêt ! Cliquez ici pour passer aux étapes suivantes',
 			'score'  => 0,
@@ -75,7 +78,7 @@ class GameController extends AbstractController
 		}else{
 			
 			$step = $this->session->get('step');
-dump($step);
+
 			$question = $this->session->get('steps')[$step];
 			$niveau = $question->getQuestion()->getLevel()->getId();
 			$this->session->set('niveau',$niveau);
@@ -136,7 +139,6 @@ dump($step);
 			if ( $reponse == "bad"){//non je préfère conserver mes gains
 				$this->session->set('bank', $this->session->get('bank')-$this->session->get('score'));
 
-				$this->session->get('jeu')->addAllScores();
 				return $this->redirectToRoute('gains',['gains'=> $this->session->get('score')],301);
 			}
 		}
@@ -157,15 +159,8 @@ dump($step);
 	 */
 	public function jeu($reponse="")
 	{
-		$em = $this->getDoctrine()->getManager();
-
 		$niveau = $this->session->get('niveau');
 		$steps = $this->session->get('steps');
-
-		//oui sauf si aucun jeu n'est lancé ou un jeu terminé
-		if( is_null($this->session->get('jeu')) ){
-			return $this->redirectToRoute('new_game',[],301);
-		}
 
 		if ($niveau < 3) {
 			return $this->redirectToRoute('question',[],301);			
@@ -193,10 +188,10 @@ dump($step);
 				$this->session->set('contexte',"choix");
 
 				return $this->render('accueil.html.twig',[
-					'players'=> $this->session->get('jeu')->getPlayers(),
+					'players'=> $this->session->get('players'),
 					'status' => 'warning',
-					'niveau' => "Vous avez gagné ! ".$this->session->get('jeu')->getScore()." € ! Banco ?",
-					'score' => $this->session->get('jeu')->getScore(),
+					'niveau' => "Vous avez gagné ! ".$this->session->get('score')." € ! Banco ?",
+					'score' => $this->session->get('score'),
 					'reponse' =>['Oui', 'Non'],					
 					'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
 				]);
@@ -210,7 +205,7 @@ dump($step);
 				$this->session->set('contexte',"choix");
 
 				return $this->render('accueil.html.twig',[
-	                'players'=> $this->session->get('jeu')->getPlayers(),
+	                'players'=> $this->session->get('players'),
 	                'status' => 'warning',
 	                'niveau' => "Vous avez gagné 500€ ! Super Banco ?",
 	                'score' => '500',
@@ -229,12 +224,11 @@ dump($step);
 
 				$this->session->set('bank', $this->session->get('bank')-1000);
 
-				$this->session->get('jeu')->addAllScores(1000);
+				//$this->saveScores(1000);
 
-				$em->flush();
 				$this->session->set('contexte',"fin");
 
-				return $this->redirectToRoute('gains',['gains'=> 1000],301);
+				return $this->redirectToRoute('gains',['gains'=> 500],301);
 			}else{
 				return $this->redirectToRoute('pertes',[],301);
 			}
@@ -247,9 +241,9 @@ dump($step);
 	 * @return Response
 	 *
 	 */
-	public function scores(): Response
+	public function scores(Request $request): Response
 	{
-		$players = $this->p->findSorted();
+		$players = unserialize($request->cookies->get('jeu1000'));
 
 		return $this->render('scores.html.twig',[
 			'players'=> $players
@@ -294,6 +288,23 @@ dump($step);
 		]);
 	}
 	/**
+	 * @Route("/save", name="save")
+	 * @return Response
+	 *
+	 */
+	public function saveGame(): Response
+	{
+		$res = new Response;
+
+		$cookie = new Cookie('jeu1000',serialize($this->session->get('players')), time()+365*24*60*60);
+		//$res->headers->setCookie(Cookie::create('','100'));
+		$res->headers->setCookie($cookie);
+		$res->send();
+
+		return $this->redirectToRoute('bug',[],301);
+	}
+
+	/**
 	 * @Route("/gains/{gains}", name="gains")
 	 * @return Response
 	 *
@@ -302,15 +313,8 @@ dump($step);
 	{
 		$this->session->set('contexte',"fin");
 
-		$em = $this->getDoctrine()->getManager();
-
-		$gains=$gains/2;
-
-		$this->p->find($this->session->get('jeu')->getPlayers()[0]->getId())->addScore($gains);
-		$this->p->find($this->session->get('jeu')->getPlayers()[1]->getId())->addScore($gains);
+		$this->saveScores($gains/2);
 		
-		$em->flush();
-
 		return $this->render('accueil.html.twig',[
 			'players' => $this->session->get('players'),
 			'niveau'  => "*** Vous avez gagné chacun ".$gains." € ! ***",
@@ -328,9 +332,7 @@ dump($step);
 	public function pertes (){
 
 		//la banque prend ses gains
-		$perte = $this->session->get('score');
-
-		$this->session->set('bank', $this->session->get('bank')+$perte);
+		$this->session->set('bank', $this->session->get('bank') + $this->session->get('score'));
 
 		$this->init();
 
@@ -360,7 +362,6 @@ dump($step);
 			'score' => 0,
 			'reponse' =>['Bonne réponse', 'Mauvaise réponse'],					
 			'question'=>['question'=>['question'=>"Voilà la question ?",'answer'=>"Voici la réponse !"]],
-			'players'=>["Joueur 1", "Joueur 2"]
 		]);
 	}
 
@@ -389,7 +390,6 @@ dump($step);
 			array_push($players,$duo->getPlayer2()->getId());
 
 			$this->session->set('players', $players);
-			$this->session->set('jeu', $jeu);
 			$this->session->set('contexte', "jeu");
 
 			return $this->redirectToRoute('jeu');
@@ -422,8 +422,8 @@ dump($step);
 		$nb_bancos = $this->q->findAllByLevel(4);
 		$nb_supers = $this->q->findAllByLevel(5);
 
-        //$joueurs = $request->cookies->get('joueurs');
-        $players = [ 'Maxime', 'Brigitte' ];
+
+        //$players = [ 'Maxime' => 100, 'Brigitte' => 100 ];
 
 		/* sélection des joueurs
 		for ($i = 0; $i <2 ; $i++) {
@@ -434,7 +434,6 @@ dump($step);
 				array_push($players, $nb_players[0]->getId());
 			}
 		}*/
-		$this->session->set('players', $players);
 
 		//sélection des questions bleues
 		if(!empty($nb_bleues)){
@@ -472,6 +471,14 @@ dump($step);
 		}
 
 		$this->session->set('steps', $steps);
+	}
+
+	private function saveScores(int $gain){
+		$players = $this->session->get('players');
+
+		foreach ($players as $p) {
+			$p += $gain;
+		}
 	}
 
 	/**

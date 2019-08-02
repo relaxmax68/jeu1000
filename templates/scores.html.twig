@@ -21,11 +21,11 @@
 		    </tr>
 		  </thead>
 		  <tbody>
-			{% for player in players %}  	
+			{% for key,value in players %}  	
 		    	<tr>
 		      		<td>{{ loop.index }}</td>
-		      		<td>{{ player }}</td>
-		      		<td>{{ player.score}}</td>
+		      		<td>{{ key }}</td>
+		      		<td>{{ value }} €</td>
 		    	</tr>
 			{% endfor %}
 			</tbody>
