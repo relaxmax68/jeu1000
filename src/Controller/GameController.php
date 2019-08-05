@@ -51,8 +51,20 @@ class GameController extends AbstractController
 		
 		$this->preparation();
 
-		$players = unserialize($request->cookies->get('jeu1000'));
-		$this->session->set('players', $players);		
+		$list_players = unserialize($request->cookies->get('jeu1000'));
+
+		$this->shuffle_assoc($list_players);
+
+		$players = array();
+		// sélection des joueurs
+		if( count($list_players)<2 ){
+			// créer les joueurs
+			//array_push($players,0);
+		} else {
+			$players = $this->array_pshift($list_players);
+		}
+
+		$this->session->set('players', $players);
 
 		return $this->render('accueil.html.twig',[
 			'players'=> $players,
@@ -313,7 +325,9 @@ class GameController extends AbstractController
 	{
 		$this->session->set('contexte',"fin");
 
-		$this->saveScores($gains/2);
+		$gains = $gains/2;
+
+		$this->saveScores($gains);
 		
 		return $this->render('accueil.html.twig',[
 			'players' => $this->session->get('players'),
@@ -422,19 +436,6 @@ class GameController extends AbstractController
 		$nb_bancos = $this->q->findAllByLevel(4);
 		$nb_supers = $this->q->findAllByLevel(5);
 
-
-        //$players = [ 'Maxime' => 100, 'Brigitte' => 100 ];
-
-		/* sélection des joueurs
-		for ($i = 0; $i <2 ; $i++) {
-			if(empty($nb_players)){
-				array_push($players,0);
-			} else {
-				array_shift($nb_players);
-				array_push($players, $nb_players[0]->getId());
-			}
-		}*/
-
 		//sélection des questions bleues
 		if(!empty($nb_bleues)){
 
@@ -479,6 +480,12 @@ class GameController extends AbstractController
 		foreach ($players as $p) {
 			$p += $gain;
 		}
+
+		$res = new Response;
+
+		$cookie = new Cookie('jeu1000',serialize($players), time()+365*24*60*60);
+		$res->headers->setCookie($cookie);
+		$res->send();		
 	}
 
 	/**
@@ -492,6 +499,35 @@ class GameController extends AbstractController
 		return $this->render('bug.html.twig',[
 			'players'=> $this->session->get('players')
 		]);
+	}
+	/**
+	 * fonctions pour les tableaux
+	 */
+    private function shuffle_assoc(&$array) {
+        $keys = array_keys($array);
+
+        shuffle($keys);
+
+        foreach($keys as $key) {
+            $new[$key] = $array[$key];
+        }
+
+        $array = $new;
+
+        return true;
+    }
+    private function array_pshift(&$array) {
+
+    	$keys = array_keys($array);
+    	$key = array_shift($keys);
+    	$element = $array[$key];
+		unset($array[$key]); 
+
+    	$keys = array_keys($array);
+    	$key1 = array_shift($keys);
+    	$element1 = $array[$key1];
+
+    	return array($key => $element, $key1 =>$element1);
 	}
 }
 ?>
