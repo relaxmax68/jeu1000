@@ -225,6 +225,9 @@ class GameController extends AbstractController
 	public function scores(Request $request): Response
 	{
 		$list_players = $this->session->get('list_players');
+		$players = $this->session->get('players');
+
+		dump($list_players);
 
 		return $this->render('scores.html.twig',[
 			'players'=> $list_players
@@ -263,10 +266,7 @@ class GameController extends AbstractController
 		$this->session->set('bank', 0);
 		$this->session->set('score', 0);
 
-		return $this->render('accueil.html.twig',[
-			'status' => 'light',
-			'niveau' => 'Cliquez ici pour commencer un nouveau jeu',
-		]);
+	    return $this->redirectToRoute('home',[],301);
 	}
 
 	/**
@@ -329,13 +329,13 @@ class GameController extends AbstractController
 
 		$this->session->set('list_players', $list_players);
 
-		$this->shuffle_assoc($list_players);
-
 		// sélection des joueurs
 		if( count($list_players)<2 ){
-			// créer les joueurs
-			//array_push($players,0);
+			$this->addFlash('warning','Il faut au minimum deux joueurs');
+			return $this->redirectToRoute('scores',[],301);	
 		} else {
+			//on mélange le tableau
+			$this->shuffle_assoc($list_players);			
 			$players = $this->array_pshift($list_players);
 		}
 
@@ -437,19 +437,51 @@ class GameController extends AbstractController
 
     	return array(0 => $key, 1 =>$key1);
 	}
+	private function setCookie() {
+
+		$list_players= $this->session->get('list_players');
+
+		$res = new Response;
+		$cookie = new Cookie('jeu1000',serialize($list_players), time()+365*24*60*60);
+		$res->headers->setCookie($cookie);
+		$res->send();
+	}
 	/**
 	 * @Route("/add", name="addplayer")
 	 * @return 
 	 */
 	public function add(){
-		return new Response("add");
+
+		if(!isset($_POST['name']) || empty($_POST['name'])){
+			header('500 Internal Server Error', true, 500);
+			die('Vous devez préciser un nom');
+		}
+		$list_players= $this->session->get('list_players');
+
+		//traitement
+		$list_players[$_POST['name']] = 0;
+
+		$this->session->set('list_players', $list_players);		
+		$this->setCookie();
+
+		return $this->redirectToRoute('scores',[],301);	
+
 	}
 	/**
 	 * @Route("/remove", name="removeplayer")
 	 * @return 
 	 */
 	public function remove(){
-		return new Response("remove");
+
+		$list_players= $this->session->get('list_players');
+
+		//traitement
+
+
+		$this->session->set('list_players', $list_players);
+		$this->setCookie();
+
+		return $this->redirectToRoute('scores',[],301);
 	}	
 }
 ?>
