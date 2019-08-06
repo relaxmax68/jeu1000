@@ -31,7 +31,7 @@
 		      		<td>{{ loop.index }}</td>
 		      		<td>{{ key }}</td>
 		      		<td>{{ value }} €</td>
-		      		<td><a href="{{ path('removeplayer') }}" class="btn btn-dark del">Supprimer</a></td>
+		      		<td><a href="{{ path('removeplayer',{ id: key }) }}" class="btn btn-dark del">Supprimer</a></td>
 		    	</tr>
 			{% endfor %}
 			</tbody>
@@ -61,7 +61,7 @@
 			$.post(url, $form.serializeArray())
 			.done(function(data,text,jqxhr){
 				$name = jqxhr.responseText;
-				$tr = "<td>3</td><td>Dédé</td><td>100</td><td><a href="{{ path('removeplayer') }}" class="btn btn-dark del">Supprimer</a></td>"
+				$tr = "<td>3</td><td>Dédé</td><td>100</td><td><a href="{{ path('removeplayer', {id: "Dédé"}) }}" class="btn btn-dark del">Supprimer</a></td>"
 				$('table tbody').prepend($tr);
 				$tr.hide().fadeIn();
 			}).fail(function(jqxhr){
@@ -71,7 +71,7 @@
 			});
 		})
 		//remove player
-		$('.table').on('click', '.del', function(e){
+		$('.del').on('click', function(e){
 			e.preventDefault();
 
 			var $a = $(this);
@@ -81,7 +81,8 @@
 
 			$.ajax(url, {type: 'DELETE'})
 			.done(function(data,text,jqxhr){
-				$a.parents('tr').fadeOut();
+				alert(data);
+				//$a.parents('tr').fadeOut();
 			}).fail(function(jqxhr){
 				alert(jqxhr.responseText);
 			}).always(function(){

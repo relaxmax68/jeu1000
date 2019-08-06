@@ -33,13 +33,22 @@ class GameController extends AbstractController
 	 * @return Response
 	 *
 	 */
-	public function new(Request $request): Response
+	public function home(Request $request): Response
 	{
 		$this->init();
 
 		$this->session->set('contexte',"pause");//contexte de jeu : pause / questions / banco
 		
-		$this->preparation($request);
+		$list_players = unserialize($request->cookies->get('jeu1000'));
+		$this->session->set('list_players', $list_players);
+
+		// sélection des joueurs
+		if( count($list_players) < 2 ){
+			$this->addFlash('warning','Il faut au minimum deux joueurs');
+			return $this->redirectToRoute('scores',[],301);	
+		} else {
+			$this->preparation();
+		}
 
 		return $this->render('accueil.html.twig',[
 			'status' => 'light',
@@ -58,7 +67,7 @@ class GameController extends AbstractController
 		$contexte = $this->session->get('contexte');
 
 		if( $contexte == "pause" ){
-			return $this->redirectToRoute('new_game',[],301);
+			return $this->redirectToRoute('home',[],301);
 		}else{
 			
 			$step = $this->session->get('step');
@@ -134,7 +143,7 @@ class GameController extends AbstractController
 		if( $contexte == "fin" ){//arrêter
 			if ( $reponse == "good" ){// nouveau jeu
 				$this->session->set('contexte',"pause");
-				return $this->redirectToRoute('new_game',[],301);
+				return $this->redirectToRoute('home',[],301);
 			}			
 			if ( $reponse == "bad"){	
 				return $this->redirectToRoute('scores',[],301);
@@ -224,14 +233,7 @@ class GameController extends AbstractController
 	 */
 	public function scores(Request $request): Response
 	{
-		$list_players = $this->session->get('list_players');
-		$players = $this->session->get('players');
-
-		dump($list_players);
-
-		return $this->render('scores.html.twig',[
-			'players'=> $list_players
-		]);
+		return $this->render('scores.html.twig');
 	}
 	/**
 	 * @Route("/init_scores", name="init_scores")
@@ -320,24 +322,15 @@ class GameController extends AbstractController
 		$this->session->set('contexte',"pause");
 	}
 
-	private function preparation($request){
+	private function preparation(){
 
 		$steps = array();//étapes du jeu
 		$players = array();//joueurs
 
-		$list_players = unserialize($request->cookies->get('jeu1000'));
-
-		$this->session->set('list_players', $list_players);
-
-		// sélection des joueurs
-		if( count($list_players)<2 ){
-			$this->addFlash('warning','Il faut au minimum deux joueurs');
-			return $this->redirectToRoute('scores',[],301);	
-		} else {
-			//on mélange le tableau
-			$this->shuffle_assoc($list_players);			
-			$players = $this->array_pshift($list_players);
-		}
+		$list_players = $this->session->get('list_players');
+		//on mélange le tableau
+		$this->shuffle_assoc($list_players);			
+		$players = $this->array_pshift($list_players);
 
 		$this->session->set('players', $players);		
 
@@ -454,7 +447,8 @@ class GameController extends AbstractController
 
 		if(!isset($_POST['name']) || empty($_POST['name'])){
 			header('500 Internal Server Error', true, 500);
-			die('Vous devez préciser un nom');
+			$this->addFlash('warning','Vous devez renseigner le nom du joueur');
+			return $this->redirectToRoute('scores',[],301);	
 		}
 		$list_players= $this->session->get('list_players');
 
@@ -468,15 +462,15 @@ class GameController extends AbstractController
 
 	}
 	/**
-	 * @Route("/remove", name="removeplayer")
+	 * @Route("/remove/{id}", name="removeplayer")
 	 * @return 
 	 */
-	public function remove(){
+	public function remove($id){
 
 		$list_players= $this->session->get('list_players');
 
 		//traitement
-
+		unset($list_players[$id]);
 
 		$this->session->set('list_players', $list_players);
 		$this->setCookie();
