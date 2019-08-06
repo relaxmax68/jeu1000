@@ -37,23 +37,22 @@ class GameController extends AbstractController
 	}
 
 	/**
-	 * @Route("/new", name="new_game")
+	 * @Route("/", name="home")
 	 * @return Response
 	 *
 	 */
 	public function new(Request $request): Response
 	{
-		$this->session->set('juste',0);//nombre de réponses justes
-		$this->session->set('score',0);//score atteint par les joueurs
-		$this->session->set('niveau',0);//niveau atteint par les joueurs
-		$this->session->set('chance',0);//une deuxième chance est donnée à chague question
-		$this->session->set('contexte',"jeu");//contexte de jeu : pause / questions / banco
+		$this->init();
+
+		$this->session->set('contexte',"pause");//contexte de jeu : pause / questions / banco
 		
 		$this->preparation($request);
 
 		return $this->render('accueil.html.twig',[
 			'status' => 'light',
-			'niveau' => 'Le jeu est prêt ! Cliquez ici pour passer aux étapes suivantes',
+			'reponse' =>['Commencer Le jeu', 'Ajouter un joueur'],			
+			'niveau' => 'Le jeu est prêt !',
 		]);
 
 	}
@@ -99,7 +98,13 @@ class GameController extends AbstractController
 		$steps = $this->session->get('steps');
 
 		if ( $contexte == "pause") {
-			return $this->redirectToRoute('new_game',[],301);
+			if ($reponse == "good"){
+				$contexte = $this->session->set('contexte',"jeu");
+				return $this->redirectToRoute('question',[],301);
+			}
+			if ($reponse == "bad"){
+				return $this->redirectToRoute('players',301);			
+			}
 		}
 
 		if ( $contexte == "jeu" ){
@@ -228,9 +233,6 @@ class GameController extends AbstractController
 	public function scores(Request $request): Response
 	{
 		$list_players = $this->session->get('list_players');
-		$players = $this->session->get('players');
-
-		dump($list_players,$players);
 
 		return $this->render('scores.html.twig',[
 			'players'=> $list_players
@@ -316,21 +318,6 @@ class GameController extends AbstractController
 		]);
 	}
 	/**
-	 * @Route("/", name="home")
-	 * @return Response
-	 *
-	 */
-	public function index(): Response
-	{
-		$this->init();
-
-		return $this->render('accueil.html.twig',[
-			'status' => 'light',
-			'niveau' => 'Cliquez ici pour commencer un nouveau jeu',
-		]);
-	}
-
-	/**
 	 * @Route("/players", name="players")
 	 * @return Response
 	 * pour modifier les joueurs sélectionnés
@@ -394,8 +381,6 @@ class GameController extends AbstractController
 		} else {
 			$players = $this->array_pshift($list_players);
 		}
-
-		dump($players, $list_players);
 
 		$this->session->set('players', $players);		
 
