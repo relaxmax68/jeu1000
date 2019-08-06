@@ -71,6 +71,7 @@ class GameController extends AbstractController
 		}else{
 			
 			$step = $this->session->get('step');
+					dump($this->session->get('juste'));
 
 			$question = $this->session->get('steps')[$step];
 			$niveau = $question->getQuestion()->getLevel()->getId();
@@ -109,7 +110,7 @@ class GameController extends AbstractController
 		}
 
 		if ( $contexte == "jeu" ){
-			// on retire la question
+			// on retire la question posée de la pile
 			$step = array_shift($steps);
 
 			//bonnes réponses
@@ -119,7 +120,9 @@ class GameController extends AbstractController
 			}
 			// mauvaises réponses
 			if ($reponse == "bad") {
-				array_push($steps,$step);
+				if ($this->session->get('chance') == 0) {
+					array_push($steps,$step); //on remet la question dans la pile pour une 2ème chance
+				}
 			}
 
 			$this->session->set('steps', $steps);
@@ -177,18 +180,19 @@ class GameController extends AbstractController
 				$this->session->set('chance',1);
 
 				return $this->redirectToRoute('question',[],301);
-			}
+			} 
+			if ($this->session->get('juste') == 6 ){
 
-			if ($this->session->get('juste') < 5){//pas assez de bonnes réponses
-	        	return $this->redirectToRoute('pertes',[],301);
-			}else{
 				$this->session->set('contexte',"choix");
+				$this->session->set('chance',0);//à partir de maintenant il n'est plus question de deuxième chance
 
 				return $this->render('accueil.html.twig',[
 					'status' => 'warning',
 					'niveau' => "Vous avez gagné ! ".$this->session->get('score')." € ! Banco ?",
 					'reponse' =>['Oui', 'Non'],					
-				]);
+				]);				
+			}else{
+	        	return $this->redirectToRoute('pertes',[],301);
 			}
 		}
 
@@ -233,7 +237,13 @@ class GameController extends AbstractController
 	 */
 	public function scores(Request $request): Response
 	{
-		return $this->render('scores.html.twig');
+		//on classe les joueurs d'après leur score
+		$list_players = $this->session->get('list_players');
+		arsort($list_players);
+
+		return $this->render('scores.html.twig',[
+			'players' => $list_players,
+		]);
 	}
 	/**
 	 * @Route("/init_scores", name="init_scores")
@@ -314,6 +324,7 @@ class GameController extends AbstractController
 
 	private function init(){
 		$this->session->set('niveau',0);
+		$this->session->set('juste',0);
 		$this->session->set('step', 0);
 		$this->session->set('steps', array());
 		$this->session->set('question',0);
@@ -386,12 +397,9 @@ class GameController extends AbstractController
 			$list_players[$p] += $gain;
 		}
 
-		$res = new Response;
-		$cookie = new Cookie('jeu1000',serialize($this->session->get('list_players')), time()+365*24*60*60);
-		$res->headers->setCookie($cookie);
-		$res->send();
-
 		$this->session->set('list_players', $list_players);
+		
+		$this->setCookie();
 	}
 
 	/**

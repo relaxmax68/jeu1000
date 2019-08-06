@@ -21,7 +21,7 @@
 			{% endif %}
 		</div>
 		<a href="{{ path('jeu')}}" hover:"color:white" visited:"color: white;">
-			<div class="btn-block btn-{{ status }} btn-lg text-center">{{ niveau }}</div>
+			<div class="btn-block btn-{{ status }} btn-lg text-center">{{ niveau }} {% if app.session.get('chance') == 1 %}2ème chance{% endif %} </div>
 		</a>
 		{% if question is defined %}
 		<div class="progress mt-1" style="height: 3em">
