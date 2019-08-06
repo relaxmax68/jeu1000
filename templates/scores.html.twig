@@ -26,11 +26,57 @@
 		      		<td>{{ loop.index }}</td>
 		      		<td>{{ key }}</td>
 		      		<td>{{ value }} €</td>
+		      		<td><a href="{{ path('removeplayer') }}" class="btn btn-dark del">Supprimer</a></td>
 		    	</tr>
 			{% endfor %}
 			</tbody>
 		</table>
+		<hr>
 		<a href="{{ path('home') }}"><div class="btn btn-dark">Retour au jeu</div></a>
-		<div class="btn btn-dark">Ajouter un joueur</div>
+		<div class="form-inline float-right">
+			<form class="float-right" method="post" action="{{ path('addplayer') }}">
+				<input type="text" name="name" placeholder="nom">
+				<button type="submit" class="btn btn-dark">Ajouter un joueur</button>
+			</form>
+		</div>
 	</div>
+{% endblock %}
+{% block javascripts %}
+<script>
+	(function($){
+		
+		$('.add').on('click', function(e){
+			e.preventDefault();
+
+			var $a = $(this);
+			var url = $a.attr('href');
+
+			$.ajax(url)
+			.done(function(data,text,jqxhr){
+				$a.parents('tr').fadeIn();
+			}).fail(function(jqxhr){
+				alert(jqxhr.responseText);
+			}).always(function(){
+				$a.text('Supprimer')
+			});
+		})
+
+		$('.del').on('click', function(e){
+			e.preventDefault();
+
+			var $a = $(this);
+			var url = $a.attr('href');
+
+			$.ajax(url)
+			.done(function(data,text,jqxhr){
+				$a.parents('tr').fadeOut();
+			}).fail(function(jqxhr){
+				alert(jqxhr.responseText);
+			}).always(function(){
+				$a.text('Supprimer')
+			});
+		})
+
+	})(jQuery);
+</script>
 {% endblock %}

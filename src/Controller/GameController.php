@@ -437,5 +437,19 @@ class GameController extends AbstractController
 
     	return array(0 => $key, 1 =>$key1);
 	}
+	/**
+	 * @Route("/add", name="addplayer")
+	 * @return 
+	 */
+	public function add(){
+		return new Response("add");
+	}
+	/**
+	 * @Route("/remove", name="removeplayer")
+	 * @return 
+	 */
+	public function remove(){
+		return new Response("remove");
+	}	
 }
 ?>
