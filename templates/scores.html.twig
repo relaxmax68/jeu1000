@@ -21,7 +21,7 @@
 		    </tr>
 		  </thead>
 		  <tbody>
-			{% for key,value in players %}  	
+			{% for key,value in app.session.get('list_players') %}  	
 		    	<tr>
 		      		<td>{{ loop.index }}</td>
 		      		<td>{{ key }}</td>

@@ -49,30 +49,11 @@ class GameController extends AbstractController
 		$this->session->set('chance',0);//une deuxième chance est donnée à chague question
 		$this->session->set('contexte',"jeu");//contexte de jeu : pause / questions / banco
 		
-		$this->preparation();
-
-		$list_players = unserialize($request->cookies->get('jeu1000'));
-
-		$this->shuffle_assoc($list_players);
-
-		$players = array();
-		// sélection des joueurs
-		if( count($list_players)<2 ){
-			// créer les joueurs
-			//array_push($players,0);
-		} else {
-			$players = $this->array_pshift($list_players);
-		}
-
-		$this->session->set('players', $players);
+		$this->preparation($request);
 
 		return $this->render('accueil.html.twig',[
-			'players'=> $players,
 			'status' => 'light',
 			'niveau' => 'Le jeu est prêt ! Cliquez ici pour passer aux étapes suivantes',
-			'score'  => 0,
-			'reponse' =>['Bonne réponse', 'Mauvaise réponse'],			
-			'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
 		]);
 
 	}
@@ -97,10 +78,8 @@ class GameController extends AbstractController
 			$this->session->set('gain',$level->find($niveau)->getScore());
 
 			return $this->render('accueil.html.twig',[
-				'players' => $this->session->get('players'),
 				'niveau'  => $level->find($niveau),
 				'status'  => $level->find($niveau)->getStatus(),
-				'score'   => $this->session->get('score'),
 				'reponse' =>['Bonne réponse', 'Mauvaise réponse'],
 				'question'=> $question
 			]);
@@ -200,12 +179,9 @@ class GameController extends AbstractController
 				$this->session->set('contexte',"choix");
 
 				return $this->render('accueil.html.twig',[
-					'players'=> $this->session->get('players'),
 					'status' => 'warning',
 					'niveau' => "Vous avez gagné ! ".$this->session->get('score')." € ! Banco ?",
-					'score' => $this->session->get('score'),
 					'reponse' =>['Oui', 'Non'],					
-					'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
 				]);
 			}
 		}
@@ -215,14 +191,12 @@ class GameController extends AbstractController
 			if ( $reponse == "good" ){
 
 				$this->session->set('contexte',"choix");
+				$this->session->set('score',500);				
 
 				return $this->render('accueil.html.twig',[
-	                'players'=> $this->session->get('players'),
 	                'status' => 'warning',
 	                'niveau' => "Vous avez gagné 500€ ! Super Banco ?",
-	                'score' => '500',
-	                'reponse' =>['Oui', 'Non'],                                     
-	                'question'=>['question'=>['question'=>"Si vous gagnez, vous doublez vos gains ?",'answer'=>"Si vous perdez, vous perdez tout."]]                            
+	                'reponse' =>['Oui', 'Non'],                     
 	            ]);
 	        } else {
 	        	return $this->redirectToRoute('pertes',[],301);
@@ -236,11 +210,9 @@ class GameController extends AbstractController
 
 				$this->session->set('bank', $this->session->get('bank')-1000);
 
-				//$this->saveScores(1000);
-
 				$this->session->set('contexte',"fin");
 
-				return $this->redirectToRoute('gains',['gains'=> 500],301);
+				return $this->redirectToRoute('gains',['gains'=> 1000],301);
 			}else{
 				return $this->redirectToRoute('pertes',[],301);
 			}
@@ -255,10 +227,13 @@ class GameController extends AbstractController
 	 */
 	public function scores(Request $request): Response
 	{
-		$players = unserialize($request->cookies->get('jeu1000'));
+		$list_players = $this->session->get('list_players');
+		$players = $this->session->get('players');
+
+		dump($list_players,$players);
 
 		return $this->render('scores.html.twig',[
-			'players'=> $players
+			'players'=> $list_players
 		]);
 	}
 	/**
@@ -268,14 +243,17 @@ class GameController extends AbstractController
 	 */
 	public function init_scores(): Response
 	{
-		$players = $this->p->findAll();
-		$em = $this->getDoctrine()->getManager();
-
-		foreach ($players as $player) {
-			$player->setScore(0);
-			$em->persist($player);
+		$list_players = $this->session->get('list_players');
+		foreach ($list_players as $key => $value){
+			$list_players[$key] = 0;
 		}
-		$em->flush();
+
+		$this->session->set('list_players', $list_players);
+
+		$res = new Response;
+		$cookie = new Cookie('jeu1000',serialize($this->session->get('list_players')), time()+365*24*60*60);
+		$res->headers->setCookie($cookie);
+		$res->send();		
 
 		return $this->redirectToRoute('scores',[],301);
 	}
@@ -289,31 +267,12 @@ class GameController extends AbstractController
 		session_unset();
 
 		$this->session->set('bank', 0);
+		$this->session->set('score', 0);
 
 		return $this->render('accueil.html.twig',[
 			'status' => 'light',
 			'niveau' => 'Cliquez ici pour commencer un nouveau jeu',
-			'score' => 0,
-			'reponse' =>['Bonne réponse', 'Mauvaise réponse'],					
-			'question'=>['question'=>['question'=>"Voilà la question ?",'answer'=>"Voici la réponse !"]],
-			'players'=>["Joueur 1", "Joueur 2"]
 		]);
-	}
-	/**
-	 * @Route("/save", name="save")
-	 * @return Response
-	 *
-	 */
-	public function saveGame(): Response
-	{
-		$res = new Response;
-
-		$cookie = new Cookie('jeu1000',serialize($this->session->get('players')), time()+365*24*60*60);
-		//$res->headers->setCookie(Cookie::create('','100'));
-		$res->headers->setCookie($cookie);
-		$res->send();
-
-		return $this->redirectToRoute('bug',[],301);
 	}
 
 	/**
@@ -330,12 +289,9 @@ class GameController extends AbstractController
 		$this->saveScores($gains);
 		
 		return $this->render('accueil.html.twig',[
-			'players' => $this->session->get('players'),
 			'niveau'  => "*** Vous avez gagné chacun ".$gains." € ! ***",
 			'status'  => 'warning',
-			'score'   => $this->session->get('score'),
 			'reponse' =>['Nouveau Jeu', 'Scores'],
-			'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
 		]);
 	}
 	/**
@@ -351,14 +307,12 @@ class GameController extends AbstractController
 		$this->init();
 
 		$this->session->set('contexte',"fin");
+		$this->session->set('score',0);
 
 		return $this->render('accueil.html.twig',[
-			'players'=> $this->session->get('players'),
 			'status' => 'info',
 			'niveau' => "* Vous avez perdu cette partie et tous vos gains sont allés à la banque ! *",
-			'score' => 0,
 			'reponse' =>['Nouveau Jeu', 'Arrêter'],				
-			'question'=>['question'=>['question'=>"Voilà La question ?",'answer'=>"Voici la réponse !"]]
 		]);
 	}
 	/**
@@ -373,9 +327,6 @@ class GameController extends AbstractController
 		return $this->render('accueil.html.twig',[
 			'status' => 'light',
 			'niveau' => 'Cliquez ici pour commencer un nouveau jeu',
-			'score' => 0,
-			'reponse' =>['Bonne réponse', 'Mauvaise réponse'],					
-			'question'=>['question'=>['question'=>"Voilà la question ?",'answer'=>"Voici la réponse !"]],
 		]);
 	}
 
@@ -425,10 +376,28 @@ class GameController extends AbstractController
 		$this->session->set('contexte',"pause");
 	}
 
-	private function preparation(){
+	private function preparation($request){
 
 		$steps = array();//étapes du jeu
 		$players = array();//joueurs
+
+		$list_players = unserialize($request->cookies->get('jeu1000'));
+
+		$this->session->set('list_players', $list_players);
+
+		$this->shuffle_assoc($list_players);
+
+		// sélection des joueurs
+		if( count($list_players)<2 ){
+			// créer les joueurs
+			//array_push($players,0);
+		} else {
+			$players = $this->array_pshift($list_players);
+		}
+
+		dump($players, $list_players);
+
+		$this->session->set('players', $players);		
 
 		$nb_bleues = $this->q->findAllByLevel(1);
 		$nb_blanches = $this->q->findAllByLevel(2);
@@ -475,17 +444,19 @@ class GameController extends AbstractController
 	}
 
 	private function saveScores(int $gain){
+		$list_players = $this->session->get('list_players');
 		$players = $this->session->get('players');
 
 		foreach ($players as $p) {
-			$p += $gain;
+			$list_players[$p] += $gain;
 		}
 
 		$res = new Response;
-
-		$cookie = new Cookie('jeu1000',serialize($players), time()+365*24*60*60);
+		$cookie = new Cookie('jeu1000',serialize($this->session->get('list_players')), time()+365*24*60*60);
 		$res->headers->setCookie($cookie);
-		$res->send();		
+		$res->send();
+
+		$this->session->set('list_players', $list_players);
 	}
 
 	/**
@@ -519,15 +490,11 @@ class GameController extends AbstractController
     private function array_pshift(&$array) {
 
     	$keys = array_keys($array);
+
     	$key = array_shift($keys);
-    	$element = $array[$key];
-		unset($array[$key]); 
-
-    	$keys = array_keys($array);
     	$key1 = array_shift($keys);
-    	$element1 = $array[$key1];
 
-    	return array($key => $element, $key1 =>$element1);
+    	return array(0 => $key, 1 =>$key1);
 	}
 }
 ?>
