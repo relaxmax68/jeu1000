@@ -8,17 +8,10 @@ use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
 
 use App\Entity\Step;
-use App\Entity\Player;
 use App\Entity\Question;
-use App\Entity\Duo;
 
 use App\Repository\QuestionRepository;
 use App\Repository\LevelRepository;
-use App\Repository\PlayerRepository;
-use App\Repository\StepRepository;
-use App\Repository\DuoRepository;
-
-use App\Form\DuoType;
 
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -29,11 +22,10 @@ class GameController extends AbstractController
 {
 	private $session;
 
-	public function __construct(SessionInterface $session, PlayerRepository $p,QuestionRepository $q)
+	public function __construct(SessionInterface $session,QuestionRepository $q)
 	{
 		$this->session = $session;
 		$this->q = $q;
-		$this->p = $p;
 	}
 
 	/**
@@ -103,7 +95,7 @@ class GameController extends AbstractController
 				return $this->redirectToRoute('question',[],301);
 			}
 			if ($reponse == "bad"){
-				return $this->redirectToRoute('players',301);			
+				return $this->redirectToRoute('scores',[],301);			
 			}
 		}
 
@@ -196,12 +188,12 @@ class GameController extends AbstractController
 			if ( $reponse == "good" ){
 
 				$this->session->set('contexte',"choix");
-				$this->session->set('score',500);				
+				$this->session->set('score',500);
 
 				return $this->render('accueil.html.twig',[
 	                'status' => 'warning',
 	                'niveau' => "Vous avez gagné 500€ ! Super Banco ?",
-	                'reponse' =>['Oui', 'Non'],                     
+	                'reponse' =>['Oui', 'Non'],
 	            ]);
 	        } else {
 	        	return $this->redirectToRoute('pertes',[],301);
@@ -317,41 +309,6 @@ class GameController extends AbstractController
 			'reponse' =>['Nouveau Jeu', 'Arrêter'],				
 		]);
 	}
-	/**
-	 * @Route("/players", name="players")
-	 * @return Response
-	 * pour modifier les joueurs sélectionnés
-	 */
-	public function players(Request $request): Response
-	{
-		$em = $this->getDoctrine()->getManager();
-		$players = $this->session->get('players');
-		$duo = new Duo();
-
-		$form = $this->createForm(DuoType::class, $duo);
-		$form->handleRequest($request);
-
-		if ($form->isSubmitted() && $form->isValid()) {
-			$em->persist($duo);
-
-			$jeu->removePlayers();
-			
-			$jeu->addPlayer($duo->getPlayer1());
-			$jeu->addPlayer($duo->getPlayer2());
-			array_push($players,$duo->getPlayer1()->getId());
-			array_push($players,$duo->getPlayer2()->getId());
-
-			$this->session->set('players', $players);
-			$this->session->set('contexte', "jeu");
-
-			return $this->redirectToRoute('jeu');
-		}
-
-		return $this->render('players.html.twig', [
-			'players'=> $this->session->get('players'),			
-			'form' => $form->createView()
-		]);
-	}
 
 	private function init(){
 		$this->session->set('niveau',0);
@@ -449,8 +406,7 @@ class GameController extends AbstractController
 	 * @return Response
 	 *
 	 */
-	public function bug(PlayerRepository $p): Response{
-		$em = $this->getDoctrine()->getManager();
+	public function bug(): Response{
 
 		return $this->render('bug.html.twig',[
 			'players'=> $this->session->get('players')
