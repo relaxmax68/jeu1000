@@ -43,8 +43,8 @@ class GameController extends AbstractController
 		$this->session->set('list_players', $list_players);
 
 		// sélection des joueurs
-		if( count($list_players) < 2 ){
-			$this->addFlash('warning','Il faut au minimum deux joueurs');
+		if( !$list_players || count($list_players) < 2 ){
+			$this->addFlash('warning','Il faut 2 joueurs au minimum. Merci de saisir les noms des joueurs');
 			return $this->redirectToRoute('scores',[],301);	
 		} else {
 			$this->preparation();
@@ -75,9 +75,7 @@ class GameController extends AbstractController
 			$question = $this->session->get('steps')[$step];
 			$niveau = $question->getQuestion()->getLevel()->getId();
 			$this->session->set('niveau',$niveau);
-			$this->session->set('gain',$level->find($niveau)->getScore());
-
-			dump("juste: ".$this->session->get('juste'),"niveau : ".$this->session->get('niveau'), "questions: ".count($this->session->get('steps')));			
+			$this->session->set('gain',$level->find($niveau)->getScore());		
 
 			return $this->render('accueil.html.twig',[
 				'niveau'  => $level->find($niveau),
@@ -249,6 +247,10 @@ class GameController extends AbstractController
 	{
 		//on classe les joueurs d'après leur score
 		$list_players = $this->session->get('list_players');
+
+		if( !$list_players){
+			$list_players = [];
+		}
 		arsort($list_players);
 
 		return $this->render('scores.html.twig',[
