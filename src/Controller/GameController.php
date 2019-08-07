@@ -31,7 +31,7 @@ class GameController extends AbstractController
 	/**
 	 * @Route("/", name="home")
 	 * @return Response
-	 *
+	 * page d'accueil
 	 */
 	public function home(Request $request): Response
 	{
@@ -60,7 +60,7 @@ class GameController extends AbstractController
 	/**
 	 * @Route("/question", name="question")
 	 * @return Response
-	 *
+	 * affiche et pose les questions
 	 */
 	public function question(LevelRepository $level): Response
 	{
@@ -71,12 +71,13 @@ class GameController extends AbstractController
 		}else{
 			
 			$step = $this->session->get('step');
-					dump($this->session->get('juste'));
 
 			$question = $this->session->get('steps')[$step];
 			$niveau = $question->getQuestion()->getLevel()->getId();
 			$this->session->set('niveau',$niveau);
 			$this->session->set('gain',$level->find($niveau)->getScore());
+
+			dump("juste: ".$this->session->get('juste'),"niveau : ".$this->session->get('niveau'), "questions: ".count($this->session->get('steps')));			
 
 			return $this->render('accueil.html.twig',[
 				'niveau'  => $level->find($niveau),
@@ -89,7 +90,7 @@ class GameController extends AbstractController
 	/**
 	 * @Route("/reponse/{reponse}", name="reponse")
 	 * @return Response
-	 * ici on gère les réponses
+	 * traite les réponses
 	 */
 	public function reponse($reponse): Response
 	{
@@ -99,7 +100,7 @@ class GameController extends AbstractController
 		$juste = $this->session->get('juste');
 		$steps = $this->session->get('steps');
 
-		if ( $contexte == "pause") {
+		if ( $contexte == "pause") { //
 			if ($reponse == "good"){
 				$contexte = $this->session->set('contexte',"jeu");
 				return $this->redirectToRoute('question',[],301);
@@ -117,11 +118,19 @@ class GameController extends AbstractController
 			if ($reponse == "good") {
 				$this->session->set('score', $this->session->get('score') + $gain);
 				$this->session->set('juste',$juste+1);
+
+				if ($this->session->get('chance') == 1 && count($steps) < 3) {
+					$this->session->set('niveau',3);
+					$this->session->set('steps', $steps);
+	        		return $this->redirectToRoute('jeu',[],301);
+				}
 			}
 			// mauvaises réponses
 			if ($reponse == "bad") {
 				if ($this->session->get('chance') == 0) {
 					array_push($steps,$step); //on remet la question dans la pile pour une 2ème chance
+				}elseif (count($steps) < 3) {
+	        		return $this->redirectToRoute('pertes',[],301);					
 				}
 			}
 
@@ -129,26 +138,27 @@ class GameController extends AbstractController
 			return $this->redirectToRoute('jeu',['reponse' => $reponse ],301);
 		}
 		
-		if( $contexte == "choix" ){
+		if( $contexte == "choix" ){ // banco ? super ?
 			if ( $reponse == "good" ){// je poursuis
 				array_shift($steps);
-				$this->session->set('contexte',"jeu");
+				$this->session->set('contexte',"jeu");// le jeu reprends
 				return $this->redirectToRoute('question',[],301);
 			}
 
 			if ( $reponse == "bad"){//non je préfère conserver mes gains
+				// les gains sont retirés de la banque
 				$this->session->set('bank', $this->session->get('bank')-$this->session->get('score'));
-
+				// on enregistre les gains pour les joueurs
 				return $this->redirectToRoute('gains',['gains'=> $this->session->get('score')],301);
 			}
 		}
 
-		if( $contexte == "fin" ){//arrêter
-			if ( $reponse == "good" ){// nouveau jeu
+		if( $contexte == "fin" ){//le jeu est fini : dernière vue
+			if ( $reponse == "good" ){ // nouveau jeu
 				$this->session->set('contexte',"pause");
 				return $this->redirectToRoute('home',[],301);
 			}			
-			if ( $reponse == "bad"){	
+			if ( $reponse == "bad"){ //voir les scores
 				return $this->redirectToRoute('scores',[],301);
 			}
 		}
@@ -259,10 +269,7 @@ class GameController extends AbstractController
 
 		$this->session->set('list_players', $list_players);
 
-		$res = new Response;
-		$cookie = new Cookie('jeu1000',serialize($this->session->get('list_players')), time()+365*24*60*60);
-		$res->headers->setCookie($cookie);
-		$res->send();		
+		$this->setCookie();		
 
 		return $this->redirectToRoute('scores',[],301);
 	}
