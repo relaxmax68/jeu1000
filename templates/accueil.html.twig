@@ -2,21 +2,13 @@
 
 {% block title %}Jeu des 1000€{% endblock %}
 
-{% block stylesheets %}
-	<style>
-		a:visited{color: white;text-decoration: none;}
-		a:hover{color: white;text-decoration: none;}
-		#players:visited{color: red;}
-	</style>
-{% endblock %}
-
 {% block body %}
 	<div class="container mt-1">
 		<div class="jumbotron text-center">
 			<h1>"Jeu des 1000€"</h1>
 			<hr>
 			{% if app.session.get('players') is defined %}
-			<h3 class="text-capitalize" style="font-size: 4rem;"><a href="{{ path('scores') }}" id="players">{{ app.session.get('players')|first}} & {{ app.session.get('players')|last}}</a></h3>
+			<h3 class="text-capitalize" style="font-size: 4rem;">{{ app.session.get('players')|first}} & {{ app.session.get('players')|last}}</h3>
 			<div>Montant en jeu : {% if app.session.get('score') %}{{ app.session.get('score') }}{% else %}0{% endif %} €</div>
 			{% endif %}
 		</div>
