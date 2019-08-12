@@ -7,7 +7,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
 
-use App\Entity\Step;
 use App\Entity\Question;
 
 use App\Repository\QuestionRepository;
@@ -73,7 +72,7 @@ class GameController extends AbstractController
 			$step = $this->session->get('step');
 
 			$question = $this->session->get('steps')[$step];
-			$niveau = $question->getQuestion()->getLevel()->getId();
+			$niveau = $question->getLevel()->getId();
 			$this->session->set('niveau',$niveau);
 			$this->session->set('gain',$level->find($niveau)->getScore());		
 
@@ -367,31 +366,31 @@ class GameController extends AbstractController
 			$rand_nb_bleues = array_rand($nb_bleues,3);
 
 			for ($i = 1; $i < 4 ; $i++) {
-				$step = new Step($nb_bleues[$rand_nb_bleues[ $i-1 ]]);
+				$step = $nb_bleues[$rand_nb_bleues[ $i-1 ]];
 				array_push($steps,$step);
 			}
 		}
 		//sélection des questions blanches
 		if(!empty($nb_blanches)){		
 			for ($i = 4; $i < 6 ; $i++) {
-				$step = new Step($nb_blanches[random_int(0, count($nb_blanches)-1)]);
+				$step = $nb_blanches[random_int(0, count($nb_blanches)-1)];
 				array_push($steps,$step);
 			}
 		}
 		//sélection de la question rouge
 		if(!empty($nb_rouges)){
-			$step = new Step($nb_rouges[random_int(0, count($nb_rouges)-1)]);
+			$step = $nb_rouges[random_int(0, count($nb_rouges)-1)];
 			array_push($steps,$step);
 		}
 
 		//sélection de la question banco
 		if(!empty($nb_bancos)){
-			$step = new Step($nb_bancos[random_int(0, count($nb_bancos)-1)]);
+			$step = $nb_bancos[random_int(0, count($nb_bancos)-1)];
 			array_push($steps,$step);			
 		}
 		//sélection de la question super banco
 		if(!empty($nb_supers)){
-			$step = new Step($nb_supers[random_int(0, count($nb_supers)-1)]);
+			$step = $nb_supers[random_int(0, count($nb_supers)-1)];
 			array_push($steps,$step);			
 		}
 
