@@ -17,7 +17,6 @@ class compteurQuestions extends AbstractExtension
     	$this->repo = $repo;
     }
 
-
     public function getFunctions()
     {
         return [

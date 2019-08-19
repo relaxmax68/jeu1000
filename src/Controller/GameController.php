@@ -346,55 +346,65 @@ class GameController extends AbstractController
 		$steps = array();//étapes du jeu
 		$players = array();//joueurs
 
+		//sélection des joueurs
 		$list_players = $this->session->get('list_players');
 		//on mélange le tableau
 		$this->shuffle_assoc($list_players);			
 		$players = $this->array_pshift($list_players);
 
-		$this->session->set('players', $players);		
+		$this->session->set('players', $players);
 
-		$nb_bleues = $this->q->findAllByLevel(1);
-		$nb_blanches = $this->q->findAllByLevel(2);
-		$nb_rouges = $this->q->findAllByLevel(3);
-		$nb_bancos = $this->q->findAllByLevel(4);
-		$nb_supers = $this->q->findAllByLevel(5);
+		//sélection des questions en fonction des niveaux $i et du nombre de questions nécessaire $min
+		$min = 3;
 
-		//sélection des questions bleues
-		if(!empty($nb_bleues)){
+		for ($i = 1; $i < 6; $i++){
 
-			//on sélectionne 3 questions au hasard
-			$rand_nb_bleues = array_rand($nb_bleues,3);
+			//on tire au sort les questions pour chacun des 5 niveaux
+			$result = $this->tirageAuSort($i, $min);
 
-			for ($i = 1; $i < 4 ; $i++) {
-				$step = $nb_bleues[$rand_nb_bleues[ $i-1 ]];
-				array_push($steps,$step);
+			// si on obtient plusieurs questions alors on boucle
+			if ( is_array($result)) {
+				foreach ($result as $key) {
+					array_push($steps,$this->q->questionsNonPosees($i)[$key]);
+				}
+			// sinon on récupère directement la question
+			}else {
+				array_push($steps,$this->q->questionsNonPosees($i)[$result]);
+			}
+			// on ajuste la valeur en fonction du nombre de questions dont on a besoin au prochain tour de boucle, 1 minimum
+			$min--;
+			if($min == 0){
+				$min = 1;
 			}
 		}
-		//sélection des questions blanches
-		if(!empty($nb_blanches)){		
-			for ($i = 4; $i < 6 ; $i++) {
-				$step = $nb_blanches[random_int(0, count($nb_blanches)-1)];
-				array_push($steps,$step);
-			}
-		}
-		//sélection de la question rouge
-		if(!empty($nb_rouges)){
-			$step = $nb_rouges[random_int(0, count($nb_rouges)-1)];
-			array_push($steps,$step);
-		}
 
-		//sélection de la question banco
-		if(!empty($nb_bancos)){
-			$step = $nb_bancos[random_int(0, count($nb_bancos)-1)];
-			array_push($steps,$step);			
+		// toutes les questions tirées au sort sont marquées comme déjà posées
+		foreach ($steps as $value) {
+			$value->setFlag(true);
 		}
-		//sélection de la question super banco
-		if(!empty($nb_supers)){
-			$step = $nb_supers[random_int(0, count($nb_supers)-1)];
-			array_push($steps,$step);			
-		}
+		$this->getDoctrine()->GetManager()->flush();
 
 		$this->session->set('steps', $steps);
+	}
+
+	private function tirageAuSort($niveau, $min)
+	{
+		// s'il ne reste plus assez de questions d'un niveau non posées…
+		if ( count($this->q->questionsNonPosees($niveau)) < $min) {
+			for ($i = 0; $i < count($this->q->findAllByLevel($niveau)); $i++) {
+				//on réinitialise les flags de toutes les questions de ce niveau
+				$this->q->findAllByLevel($niveau)[$i]->setFlag(false);
+			}
+			$this->getDoctrine()->GetManager()->flush();
+		}
+
+		if ( count($this->q->questionsNonPosees($niveau)) < $min) {
+			//décidément il n'y a pas assez de questions pour lancer le jeu
+			return new Response("Il n'y a pas suffisamment de questions pour lancer le jeu");
+		}else{
+			//sinon on retourne un tableau de clés comme résultat du tirage au sort
+			return array_rand($this->q->questionsNonPosees($niveau),$min);
+		}
 	}
 
 	private function saveScores(int $gain){

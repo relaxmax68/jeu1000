@@ -45,4 +45,15 @@ class QuestionRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
+
+    public function questionsNonPosees($level)
+    {
+        return $this->createQueryBuilder('q')
+            ->Where('q.flag = false')
+            ->andWhere('q.level = :val')
+            ->setParameter('val', $level)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

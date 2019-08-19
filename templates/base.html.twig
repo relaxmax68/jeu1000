@@ -28,7 +28,7 @@
                 <a class="nav-link" href="#"><b>Banque : {% if app.session.get('bank') %}{{ app.session.get('bank') }}{% else %}0{% endif %} €</b></a>
               </li>
             </ul>
-            <div class="float-right"><span class="badge badge-light">il reste {{ compteur() }} question(s)</span></div>
+            <div class="float-right"><span class="badge badge-light">Il y a {{ compteur() }} questions au total.</span></div>
           </div>
         </nav>
         {% block body %}{% endblock %}
