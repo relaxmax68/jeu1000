@@ -34,7 +34,7 @@
 		      		<td>{{ loop.index }}</td>
 		      		<td>{{ key }}</td>
 		      		<td>{{ value }} €</td>
-		      		<td><a href="{{ path('removeplayer',{ id: key }) }}" class="btn btn-dark del">Supprimer</a></td>
+		      		<td><a href="{{ path('removeplayer',{ id: key }) }}" class="btn btn-dark">Supprimer</a></td>
 		    	</tr>
 			{% endfor %}
 			</tbody>
@@ -44,55 +44,9 @@
 		<div class="form-inline float-right">
 			<form class="float-right" method="post" action="{{ path('addplayer') }}" id="form-add">
 				<input type="text" name="name" placeholder="nom du joueur">
-				<button type="submit" class="btn btn-dark add">Ajouter un joueur</button>
+				<button type="submit" class="btn btn-dark">Ajouter un joueur</button>
 			</form>
 		</div>
 	</div>
 {% endblock %}
-{% block javascripts %}
-<script>
-	(function($){
-		//add player
-		$('#form-add').on('submit', function(e){
-			e.preventDefault();
 
-			var $form = $(this);
-			var url = $form.attr('action');
-
-			$form.find('button').text('Chargement');
- 
-			$.post(url, $form.serializeArray())
-			.done(function(data,text,jqxhr){
-				$name = jqxhr.responseText;
-				$tr = "<td>3</td><td>Dédé</td><td>100</td><td><a href="{{ path('removeplayer', {id: "Dédé"}) }}" class="btn btn-dark del">Supprimer</a></td>"
-				$('table tbody').prepend($tr);
-				$tr.hide().fadeIn();
-			}).fail(function(jqxhr){
-				alert(jqxhr.responseText);
-			}).always(function(){
-				$form.find('button').text('Ajouté !')
-			});
-		})
-		//remove player
-		$('.del').on('click', function(e){
-			e.preventDefault();
-
-			var $a = $(this);
-			var url = $a.attr('href');
-
-			$a.find('button').text('Chargement');			
-
-			$.ajax(url, {type: 'DELETE'})
-			.done(function(data,text,jqxhr){
-				alert(data);
-				//$a.parents('tr').fadeOut();
-			}).fail(function(jqxhr){
-				alert(jqxhr.responseText);
-			}).always(function(){
-				$a.text('Supprimer')
-			});
-		})
-
-	})(jQuery);
-</script>
-{% endblock %}

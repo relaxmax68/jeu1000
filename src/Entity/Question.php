@@ -36,6 +36,11 @@ class Question
      */
     private $level;
 
+    /**
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $flag;
+
     public function __toString()
     {
         return $this->question;
@@ -90,6 +95,18 @@ class Question
     public function setLevel(?Level $level): self
     {
         $this->level = $level;
+
+        return $this;
+    }
+
+    public function getFlag(): ?bool
+    {
+        return $this->flag;
+    }
+
+    public function setFlag(?bool $flag): self
+    {
+        $this->flag = $flag;
 
         return $this;
     }
