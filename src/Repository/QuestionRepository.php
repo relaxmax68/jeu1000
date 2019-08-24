@@ -56,4 +56,13 @@ class QuestionRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
+
+    public function questionsRestante()
+    {
+        return $this->createQueryBuilder('q')
+            ->Where('q.flag = false')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

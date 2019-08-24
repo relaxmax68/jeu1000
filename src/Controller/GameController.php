@@ -354,6 +354,7 @@ class GameController extends AbstractController
 
 		$this->session->set('players', $players);
 
+
 		//sélection des questions en fonction des niveaux $i et du nombre de questions nécessaire $min
 		$min = 3;
 
@@ -361,7 +362,6 @@ class GameController extends AbstractController
 
 			//on tire au sort les questions pour chacun des 5 niveaux
 			$result = $this->tirageAuSort($i, $min);
-
 			// si on obtient plusieurs questions alors on boucle
 			if ( is_array($result)) {
 				foreach ($result as $key) {
@@ -385,6 +385,10 @@ class GameController extends AbstractController
 		$this->getDoctrine()->GetManager()->flush();
 
 		$this->session->set('steps', $steps);
+		$reste = (count($this->q->questionsRestante()));
+		$this->session->set('reste', $reste);
+		dump($reste);
+
 	}
 
 	private function tirageAuSort($niveau, $min)
