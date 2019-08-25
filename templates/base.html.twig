@@ -27,6 +27,9 @@
               <li class="nav-item">
                 <a class="nav-link" href="#"><b>Banque : {% if app.session.get('bank') %}{{ app.session.get('bank') }}{% else %}0{% endif %} €</b></a>
               </li>
+              <li class="nav-item">
+                   <a class="nav-link" href="{{ path('regle')}}">Régles du jeu</a>
+              </li>
             </ul>
             <div class="float-right"><span class="badge badge-light">Il y a {{ compteur() }} questions au total et il reste {{ app.session.get('reste') }} question(s)</span></div>
           </div>

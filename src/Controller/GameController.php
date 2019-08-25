@@ -387,7 +387,6 @@ class GameController extends AbstractController
 		$this->session->set('steps', $steps);
 		$reste = (count($this->q->questionsRestante()));
 		$this->session->set('reste', $reste);
-		dump($reste);
 
 	}
 
@@ -434,6 +433,16 @@ class GameController extends AbstractController
 		return $this->render('bug.html.twig',[
 			'players'=> $this->session->get('players')
 		]);
+	}
+
+	/**
+	* @Route("/regle", name="regle")
+	* @return Ressponse
+	*
+	*/
+	public function regle(): Response{
+
+		return $this->render('regle.html.twig');
 	}
 	/**
 	 * fonctions pour les tableaux
