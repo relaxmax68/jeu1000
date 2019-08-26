@@ -1,0 +1,135 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Jeu des 1000€{% endblock %}
+
+{% block stylesheets %}
+	<style>
+	
+	</style>
+{% endblock %}
+
+{% block body %}
+	<div class="container">
+		<div class="jumbotron text-center">
+		<h2 style="color:#3342ff", text-align:center>Voici les régles du jeux:</h2>
+		
+		<div class="text-left">
+		<h6 style="color:#3396ff">Principe et déroulement du jeu :</h6>
+
+		<table class = "table table-bordeless">
+			<tbody>
+				<tr>
+					<td> Dans le logiciel une base de donnée contient les questions enregistrées et classées dans un ordre croissant de difficulté, en cinq catégories (Bleu, Blanc, Rouge, Banco et Super Banco).
+					</td>
+				</tr>
+				<tr>
+					<td> L’administrateur a toute liberté pour les classer dans l'une ou l'autre des cinq catégories. Il peut rajouter autant de questions qu’il désire.
+					</td>
+				</tr>
+				<tr>
+					<td> Les six questions posées au cours de chaque jeu par le logiciel sont tirées au sort pour les joueurs,  deux joueurs, qui auparavant se sont enregistré dans le jeu. <br> L’enregistrement des joueurs se fait sous forme de cookies sur votre ordinateur, donc il n’y a aucun transfert de données ailleurs.
+					</td>
+				</tr>
+				<tr>
+					<td><h6 style="color:#3396ff">Les questions sélectionnées représentent :</h6></td>
+				</tr>
+				<tr>
+					<td>• Trois questions <span style="background-color:#007bff"> 
+						<font color=#fff > Bleues </font> </span>  d'une valeur de 20 chacune.
+					</td>
+				</tr>
+				<tr>
+    				<td>• Deux questions <span style="background-color:#6c757d"> 
+						<font color=#fff > Blanches </font> </span> d'une valeur de 45 euros chacune.
+					</td>
+    			</tr>
+    			<tr>
+    				<td>• Deux questions <span style="background-color:#dc3545"> 
+						<font color=#fff > Rouge </font> </span> d'une valeur de 100 euros.
+					</td>
+    			</tr>
+    			<tr>
+    				<td>• Deux questions <span style="background-color:#28a745"> 
+						<font color=#fff > Banco </font> </span> d'une valeur de 250 euros.
+					</td>
+    			<tr>
+    				<td>• Deux questions <span style="background-color:#343a40"> 
+						<font color=#fff > SuperBanco </font> </span> d'une valeur de 500 euros.
+					</td>
+				</tr>
+				<tr>
+    				<td>Soit un total : <span style="color:#bf0802"> mille euros imaginaire!!!</span></td>
+				</tr>
+				<tr>
+    				<td>La somme correspondante indiquée ci-dessus est soit au bénéfice des deux joueurs s'ils répondent exactement à la question posée, soit au bénéfice de la banque  si la réponse donnée par les joueurs est inexacte. </td>
+				</tr>
+				<tr>
+    				<td>Si les joueurs ont répondu exactement aux six premières questions du jeu, ils auront la possibilité de porter leur gain total à cinq cents euros en acceptant de répondre à une septième question tirée au sort qui prend la dénomination de " Banco ".</td>
+				</tr>
+				<tr>
+    				<td>Si les joueurs  ne répondent pas à la question posées, ils perdent leur gains ceux-ci qui sont donc remis à la banque.</td>
+				</tr>
+				<tr>
+    				<td>Si les joueurs s’arrête là, ils empochent chacun la moitié de la somme obtenue.</td>
+				</tr>
+				<tr>
+    				<td>Les joueurs ayant réussi le "Banco " peuvent remettre en jeu leur gain de cinq cents euros en demandant le " Super Banco ", c'est à dire une huitième question tirée également au sort. S'ils répondent à cette question, ils gagnent mille euros, et empochent chacun la moitié de la somme obtenue; sinon, ils perdent les gains acquis et ces gains sont remis à la banque.</td>
+				</tr>
+				<tr>
+    				<td>La sélection des joueurs est effectuée aléatoirement par le logiciel, il faut au minimum deux joueurs pour exécuter le jeu.</td>
+				</tr>
+
+			</tbody>
+
+		</table>
+		<table class = "table table-bordered">
+			<thead>
+				<tr class = "table-primary">
+					<th style="width:10%">Menu</th>
+					<th style="width:90%">Signification : </th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td class = "table-primary"> <span style="color: black; font-weight: bold; font-style: italic;">Accueil</span></td>
+					<td>Retour au début du jeu et sélection aléatoires des joueurs.
+						Si en cours de jeu l’on clique sur Accueil on redémarre le jeu sans obtenir les gains et les joueurs sont à nouveau tirés au sort.
+					</td>
+				</tr>
+				<tr>
+					<td class = "table-primary"><span style="color: black; font-weight: bold; font-style: italic;">Scores</span></td>
+					<td>
+						<p>Permet de voir les scores de chacun, de pouvoir réinitialiser les scores donc les remettre à zéro pour chaque joueur.
+						</p>
+						<p>
+						Si en cours de jeu l’on clique sur Scores et Score des joueurs ou Réinitialiser, les joueurs perdent leurs gains.
+						</p>
+						<p></p>
+						<h6>Scores des joueurs</h6>
+						<p>Permet de voir le score de chaque joueur.</p>
+						<p></p>
+						<h6>Reinitialiser les scores</h6>
+						<p>Remet tout les scores de chaque joueurs à zero.</p>
+						<p></p>
+						<h6>Ajouter un joueur</h6>
+						<p>C'est ici que l'on ajoute ou supprime les joueurs.</p>
+					</td>
+				</tr>
+				<tr>
+					<td class = "table-primary"><span style="color: black; font-weight: bold; font-style: italic;">Banque</span></td>
+					<td>L’on voit la somme en positif ou négatif des gains obtenus.
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		
+		<a href="{{ path('home')}}">
+			<button type="button" class="btn btn-primary btn-lg btn-block">
+				<span style="color: black; font-weight: bold; font-style: italic;">Retour vers l'accueil, le jeu redémarre...
+				</span>
+			</button>
+		</a>
+
+		</div>
+	</div>
+{% endblock %}
