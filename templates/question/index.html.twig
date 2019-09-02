@@ -7,24 +7,23 @@
 	<h1>Liste des questions</h1>
 
 	<table class="table table-striped">
-			<thead>
-			<tr>	
-				<th>Questions</th>
-				<th>Réponses</th>
-				<th>Niveaux</th>
-			</tr>
-			</thead>
-			<tbody>
-			{% for item in questions %}
-				<tr>
+		<thead>
+		<tr>	
+			<th>Questions</th>
+			<th>Réponses</th>
+			<th>Niveaux</th>
+			<th></th>
+		</tr>
+		</thead>
+		<tbody>
+		{% for item in questions %}
+			<tr>
 				<td>{{ item.question }}</td>
 				<td>{{ item.answer }}</td>
 				<td class="btn-{{ item.level.status }}">{{ item.level }}</td>
-
-				</tr>
-
-				
-			{% endfor %}
+				<td> <a class="btn btn-info" href="{{ path('question_edit',{id: item.id}) }}">Editer</a> </td>
+			</tr>			
+		{% endfor %}
 		</tbody>
 	</table>
 
