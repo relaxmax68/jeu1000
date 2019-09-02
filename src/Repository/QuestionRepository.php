@@ -65,4 +65,13 @@ class QuestionRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
+
+    public function listeQuestionsClassees()
+    {
+        return $this->createQueryBuilder('q')
+            ->orderBy('q.level', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

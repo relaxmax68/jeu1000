@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des questions{% endblock %}
+
+{% block body %}
+<div class="container">
+	<h1>Liste des questions</h1>
+
+	<table class="table table-striped">
+			<thead>
+			<tr>	
+				<th>Questions</th>
+				<th>Réponses</th>
+				<th>Niveaux</th>
+			</tr>
+			</thead>
+			<tbody>
+			{% for item in questions %}
+				<tr>
+				<td>{{ item.question }}</td>
+				<td>{{ item.answer }}</td>
+				<td class="btn-{{ item.level.status }}">{{ item.level }}</td>
+
+				</tr>
+
+				
+			{% endfor %}
+		</tbody>
+	</table>
+
+</div>
+{% endblock %}
