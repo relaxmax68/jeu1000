@@ -74,4 +74,13 @@ class QuestionRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
+
+    public function questionsAModifier()
+    {
+        return $this->createQueryBuilder('q')
+            ->Where('q.id = id')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

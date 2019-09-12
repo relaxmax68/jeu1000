@@ -5,6 +5,7 @@
 {% block body %}
 <div class="container">
 	<h1>Liste des questions</h1>
+	<a class="btn btn-primary" href="{{ path('question_ajouter') }}">Ajouter une question</a>
 
 	<table class="table table-striped">
 		<thead>
@@ -12,7 +13,6 @@
 			<th>Questions</th>
 			<th>Réponses</th>
 			<th>Niveaux</th>
-			<th></th>
 		</tr>
 		</thead>
 		<tbody>
@@ -22,7 +22,7 @@
 				<td>{{ item.answer }}</td>
 				<td class="btn-{{ item.level.status }}">{{ item.level }}</td>
 				<td> <a class="btn btn-info" href="{{ path('question_edit',{id: item.id}) }}">Editer</a> </td>
-			</tr>			
+			</tr>		
 		{% endfor %}
 		</tbody>
 	</table>

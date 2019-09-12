@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter une question!{% endblock %}
+
+{% block body %}
+<div class="container">
+	<h1> Ajouter une question:</h1>
+	{{ form_start(form) }}
+	{{ form_rest(form) }}
+	<button type="submit" class="btn btn-dark">Ajouter</button>
+	{{ form_end(form) }}
+	<a class="btn btn-info" href="{{ path('question_liste') }}">Retour</a>
+	</div>
+{% endblock %}
